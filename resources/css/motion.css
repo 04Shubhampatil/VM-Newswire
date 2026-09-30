@@ -1,0 +1,420 @@
+/* ==========================================================================
+   VM Newswire motion system
+   Every animation here has a job: showing distribution (hero), hierarchy
+   (reveals), process (timeline), interactivity (hovers) or continuity
+   (page transitions). All of it switches off under prefers-reduced-motion.
+   Only transform / translate / scale / opacity / clip-path are animated.
+   ========================================================================== */
+
+/* --- Header: transparent at top, frosted after scrolling ------------------ */
+.site-header {
+    view-transition-name: site-header;
+    transition:
+        background-color 300ms var(--ease-editorial),
+        border-color 300ms var(--ease-editorial),
+        box-shadow 300ms var(--ease-editorial);
+}
+
+.site-header[data-scrolled] {
+    background-color: rgb(255 255 255 / 0.86);
+    border-color: var(--color-line);
+    box-shadow: 0 8px 24px -22px rgb(27 27 47 / 0.45);
+    -webkit-backdrop-filter: saturate(1.2) blur(10px);
+    backdrop-filter: saturate(1.2) blur(10px);
+}
+
+.nav-link {
+    position: relative;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 300ms var(--ease-editorial);
+}
+
+.nav-link:hover::after,
+.nav-link[aria-current='page']::after {
+    transform: scaleX(1);
+}
+
+/* --- Scroll progress (2px) ------------------------------------------------ */
+.scroll-progress {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 60;
+    height: 2px;
+    background: var(--color-accent);
+    transform: scaleX(var(--progress, 0));
+    transform-origin: 0 50%;
+    pointer-events: none;
+}
+
+@supports (animation-timeline: scroll()) {
+    .scroll-progress {
+        animation: progress-grow linear both;
+        animation-timeline: scroll(root);
+    }
+}
+
+@keyframes progress-grow {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+/* --- Scroll reveal (only when JS is running) ------------------------------ */
+.js [data-reveal] {
+    opacity: 0;
+    translate: 0 24px;
+    transition:
+        opacity 800ms var(--ease-editorial),
+        translate 800ms var(--ease-editorial),
+        scale 800ms var(--ease-editorial),
+        clip-path 900ms var(--ease-editorial);
+    /* --reveal-base lets a group start after its neighbours (e.g. network nodes after the "200+" copy). */
+    transition-delay: calc((var(--reveal-base, 0) + var(--reveal-i, 0)) * 100ms);
+}
+
+.js [data-reveal='clip'] {
+    translate: 0 0;
+    clip-path: inset(0 0 100% 0);
+}
+
+.js [data-reveal='scale'] {
+    translate: 0 0;
+    scale: 0.98;
+}
+
+.js [data-reveal].is-visible {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    clip-path: inset(0 0 0 0);
+}
+
+/* --- Hero: one release → many outlets ------------------------------------- */
+.hn {
+    --mx: 0;
+    --my: 0;
+}
+
+.hn-orbit { translate: calc(var(--mx) * 2.5px) calc(var(--my) * 2.5px); }
+.hn-center { translate: calc(var(--mx) * 6px) calc(var(--my) * 6px); }
+.hn-outlet { translate: calc(var(--mx) * var(--depth, 4) * 1px) calc(var(--my) * var(--depth, 4) * 1px); }
+
+.hn-center-inner {
+    animation:
+        hn-appear 700ms var(--ease-editorial) both,
+        hn-float 6s ease-in-out 900ms infinite;
+}
+
+.hn-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: hn-draw 700ms var(--ease-editorial) calc(var(--d) + 500ms) forwards;
+}
+
+.hn-node {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: hn-node 500ms var(--ease-editorial) calc(var(--d) + 400ms) forwards;
+}
+
+.hn-pulse {
+    stroke-dasharray: 0.06 1;
+    stroke-dashoffset: 0.06;
+    opacity: 0;
+    animation: hn-pulse 9s linear calc(var(--d) + 3s) infinite;
+}
+
+.hn-outlet-inner {
+    animation: hn-in 650ms var(--ease-editorial) calc(var(--d) + 900ms) both;
+}
+
+.hn-status {
+    background: var(--color-line);
+    animation: hn-status 400ms ease calc(var(--d) + 1300ms) forwards;
+}
+
+@keyframes hn-appear {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+}
+
+@keyframes hn-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+@keyframes hn-draw {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes hn-node {
+    0% { opacity: 0; transform: scale(0.2); }
+    60% { opacity: 1; transform: scale(1.5); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes hn-pulse {
+    0% { stroke-dashoffset: 0.06; opacity: 1; }
+    12% { stroke-dashoffset: -1; opacity: 1; }
+    13%, 100% { stroke-dashoffset: -1; opacity: 0; }
+}
+
+@keyframes hn-in {
+    from { opacity: 0; transform: translateY(15px); }
+}
+
+@keyframes hn-status {
+    to { background: var(--color-success); box-shadow: 0 0 0 3px rgb(63 143 99 / 0.15); }
+}
+
+/* --- Media marquee -------------------------------------------------------- */
+.marquee {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 40s linear infinite;
+}
+
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+    animation-play-state: paused;
+}
+
+@keyframes marquee {
+    to { transform: translateX(-50%); }
+}
+
+/* --- Package card micro-interactions -------------------------------------- */
+.pkg-card {
+    --lift: 0px;
+    transform: translateY(var(--lift));
+    transition:
+        transform 380ms var(--ease-editorial),
+        border-color 380ms var(--ease-editorial),
+        box-shadow 380ms var(--ease-editorial);
+}
+
+.pkg-card:hover {
+    transform: translateY(calc(var(--lift) - 6px));
+    border-color: #A98BF0;
+    box-shadow: 0 22px 44px -34px rgb(27 27 47 / 0.5);
+}
+
+.pkg-card[data-featured]:hover {
+    border-color: var(--color-accent);
+}
+
+@media (min-width: 1280px) {
+    .pkg-card[data-featured] { --lift: -12px; }
+}
+
+.pkg-num { transition: color 300ms var(--ease-editorial); }
+.pkg-card:hover .pkg-num { color: var(--color-accent-ink); }
+
+.pkg-rule {
+    display: block;
+    height: 1px;
+    width: 48px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 400ms var(--ease-editorial);
+}
+
+.pkg-card:hover .pkg-rule,
+.pkg-card[data-featured] .pkg-rule { transform: scaleX(1); }
+
+.pkg-card .chip { transition: transform 300ms var(--ease-editorial); }
+.pkg-card:hover .chip { transform: translateY(-1px); }
+
+.pkg-check svg {
+    opacity: 0.55;
+    transform: translateX(-2px);
+    transition: opacity 300ms var(--ease-editorial), transform 300ms var(--ease-editorial);
+    transition-delay: calc(var(--i, 0) * 60ms);
+}
+
+.pkg-card:hover .pkg-check svg,
+.pkg-card[data-featured] .pkg-check svg {
+    opacity: 1;
+    transform: none;
+}
+
+/* --- How-it-works progress timeline --------------------------------------- */
+.step-num { transition: color 500ms var(--ease-editorial); }
+
+.step-fill {
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 700ms var(--ease-editorial);
+}
+
+.step-vfill {
+    transform: scaleY(0);
+    transform-origin: 50% 0;
+    transition: transform 700ms var(--ease-editorial);
+}
+
+.step-dot { transition: background-color 400ms var(--ease-editorial), border-color 400ms, color 400ms; }
+
+.step.is-active .step-num { color: var(--color-ink); }
+.step.is-current .step-num { color: var(--color-accent); }
+.step.is-active .step-fill,
+.step.is-active .step-vfill { transform: none; }
+.step.is-active .step-dot { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+
+/* Without JS, show the finished timeline. */
+html:not(.js) .step-fill,
+html:not(.js) .step-vfill { transform: none; }
+html:not(.js) .step-num { color: var(--color-ink); }
+
+/* --- Sample report document ----------------------------------------------- */
+.doc-float { animation: hn-float 7s ease-in-out infinite; }
+.doc-tilt { perspective: 1200px; }
+
+.doc-tilt > * {
+    transition: transform 600ms var(--ease-editorial);
+    transform-style: preserve-3d;
+}
+
+.doc-tilt:hover > * { transform: rotateX(2deg) rotateY(-3deg); }
+
+/* --- Enquiry success check ------------------------------------------------ */
+.check-draw circle,
+.check-draw path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+}
+
+.check-draw circle { animation: hn-draw 600ms var(--ease-editorial) forwards; }
+.check-draw path { animation: hn-draw 400ms var(--ease-editorial) 450ms forwards; }
+
+/* --- Skeleton loading ----------------------------------------------------- */
+.skeleton {
+    background: linear-gradient(90deg, var(--color-line-soft) 0%, #F3F0FA 50%, var(--color-line-soft) 100%);
+    background-size: 200% 100%;
+    animation: skeleton 1.4s ease-in-out infinite;
+    border-radius: 4px;
+}
+
+@keyframes skeleton {
+    from { background-position: 100% 0; }
+    to { background-position: -100% 0; }
+}
+
+/* --- Page transitions (cross-document View Transitions) ------------------- */
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root) {
+    animation: vt-out 200ms var(--ease-editorial) both;
+}
+
+::view-transition-new(root) {
+    animation: vt-in 350ms var(--ease-editorial) both;
+}
+
+@keyframes vt-out {
+    to { opacity: 0; }
+}
+
+@keyframes vt-in {
+    from { opacity: 0; transform: translateY(8px); }
+}
+
+/* --- Reduced motion: keep only essential state changes -------------------- */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    .js [data-reveal] {
+        opacity: 1;
+        translate: none;
+        scale: none;
+        clip-path: none;
+        transition: none;
+    }
+
+    .hn-pulse,
+    .marquee-clone { display: none; }
+
+    .marquee { -webkit-mask-image: none; mask-image: none; }
+    .marquee-track { width: auto; flex-wrap: wrap; justify-content: center; row-gap: 12px; }
+
+    .step-fill,
+    .step-vfill { transform: none; transition: none; }
+
+    .doc-tilt:hover > *,
+    .card-lift:hover,
+    .btn:hover,
+    .btn:active { transform: none; }
+
+    .pkg-card:hover { transform: translateY(var(--lift)); }
+
+    ::view-transition-old(root),
+    ::view-transition-new(root) { animation: none; }
+}
+
+/* --- Poster cards (hero network) ------------------------------------------ */
+.poster-card {
+    cursor: pointer;
+    transition:
+        transform 300ms var(--ease-editorial),
+        border-color 300ms var(--ease-editorial),
+        box-shadow 300ms var(--ease-editorial);
+}
+
+.poster-card:hover,
+.poster-card:focus-visible {
+    transform: translateY(-4px);
+    border-color: #A98BF0;
+    box-shadow: 0 18px 32px -22px rgb(27 27 47 / 0.5);
+}
+
+.poster-img {
+    transition: transform 350ms var(--ease-editorial);
+}
+
+.poster-card:hover .poster-img { transform: scale(1.03); }
+
+.poster-label,
+.poster-name { transition: color 300ms var(--ease-editorial); }
+.poster-card:hover .poster-label { color: var(--color-accent-ink); }
+
+/* Fallback sits behind the image; it shows through when there is no <img> (or it failed and was removed). */
+.poster-fallback { z-index: 0; }
+.poster-media > .poster-img { position: relative; z-index: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+    .poster-card:hover { transform: none; }
+    .poster-card:hover .poster-img { transform: none; }
+}
+
+/* --- Popover boxes: CSS-only entrance (plays each time the box is shown) --- */
+.modal-pop { animation: vt-in 350ms var(--ease-editorial) both; }
+
+@media (prefers-reduced-motion: reduce) {
+    .modal-pop { animation: none; }
+}

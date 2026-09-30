@@ -1,0 +1,273 @@
+@import 'tailwindcss';
+@import './motion.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/*
+ * VM Newswire design tokens — white pages, charcoal text, vivid purple accent.
+ * `accent` (emphasis, rules, large type) · `accent-ink` (small purple text, 6.6:1 on white)
+ * `accent-fill` (buttons, 4.9:1 with white text) · `brand` (full-width purple bands).
+ * `static` always emits the tokens, because motion.css reads them with var().
+ */
+@theme static {
+    --font-sans: var(--font-vmn-body), 'Helvetica Neue', Arial, sans-serif;
+    --font-display: var(--font-vmn-body), 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: var(--font-vmn-mono), 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --color-canvas: #ffffff;
+    --color-canvas-deep: #f3f0fa;
+    --color-ink: #1b1b2f;
+    --color-brand: #7c3aed;
+    --color-brand-soft: #6d28d9;
+    --color-brand-line: #9d7cf0;
+    --color-accent: #7c3aed;
+    --color-accent-ink: #6d28d9;
+    --color-accent-fill: #7c3aed;
+    --color-accent-fill-hover: #6d28d9;
+    --color-accent-soft: #f1eafe;
+    --color-accent-on-brand: #e9dcff;
+    --color-muted: #5b5f73;
+    --color-muted-on-brand: #e6ddff;
+    --color-line: #e6e4ef;
+    --color-line-soft: #efedf6;
+    --color-success: #3f8f63;
+    --color-success-ink: #2f7550;
+    --color-success-soft: #e4f1e9;
+    --color-danger: #b42318;
+    --color-danger-soft: #fdecea;
+
+    --radius-card: 8px;
+    --radius-control: 6px;
+
+    --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+    html {
+        -webkit-font-smoothing: antialiased;
+        scroll-behavior: smooth;
+        scroll-padding-top: 92px;
+    }
+
+    body {
+        @apply bg-canvas font-sans text-ink;
+    }
+
+    ::selection {
+        @apply bg-accent-soft text-ink;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+@layer components {
+    /* 1280px of content, with 20px (mobile) / 32px (tablet and up) side padding. */
+    .container-site {
+        @apply mx-auto w-full max-w-[1344px] px-5 md:px-8;
+    }
+
+    /* Section rhythm: 80 mobile · 112 tablet · 144 desktop */
+    .section-y {
+        @apply py-20 md:py-28 lg:py-36;
+    }
+
+    /* Small purple label above headings (the reference uses plain purple text, no rule). */
+    .eyebrow {
+        @apply flex items-center gap-3 text-[13px] font-semibold tracking-[0.02em] text-accent-ink;
+    }
+
+    .eyebrow-dark {
+        @apply text-accent-on-brand;
+    }
+
+    /* Headings: semibold sans; <em> inside a heading is the purple-underlined key phrase. */
+    .display {
+        @apply font-display font-semibold tracking-[-0.02em];
+    }
+
+    .display em {
+        font-style: normal;
+        color: var(--color-accent-ink);
+        text-decoration: underline;
+        text-decoration-color: var(--color-accent);
+        text-decoration-thickness: 3px;
+        text-underline-offset: 0.14em;
+    }
+
+    .text-canvas .display em,
+    .display.text-canvas em,
+    .text-white .display em {
+        color: inherit;
+        text-decoration-color: currentColor;
+    }
+
+    .label-caps {
+        @apply text-[11px] font-bold tracking-[0.12em] text-muted uppercase;
+    }
+
+    /* Buttons: darken + lift 1px on hover, press down 1px, trailing arrow slides 4px. */
+    .btn {
+        @apply inline-flex h-[52px] items-center justify-center gap-2.5 rounded-[6px] px-6 text-[15px] font-semibold whitespace-nowrap focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50;
+        transition:
+            background-color 250ms var(--ease-editorial),
+            border-color 250ms var(--ease-editorial),
+            color 250ms var(--ease-editorial),
+            transform 250ms var(--ease-editorial);
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .btn:active {
+        transform: translateY(1px);
+    }
+
+    .btn > svg:last-child:not(:first-child),
+    .link-arrow > svg:last-child,
+    .arrow-nudge {
+        transition: transform 250ms var(--ease-editorial);
+    }
+
+    .btn:hover > svg:last-child:not(:first-child),
+    .link-arrow:hover > svg:last-child,
+    .group:hover .arrow-nudge {
+        transform: translateX(4px);
+    }
+
+    .btn-sm {
+        @apply h-11 px-4 text-sm;
+    }
+
+    .btn-primary,
+    .btn-dark {
+        @apply bg-accent-fill text-white hover:bg-accent-fill-hover;
+    }
+
+    .btn-secondary {
+        @apply border border-[#c9bff0] bg-white text-accent-ink hover:border-accent hover:bg-accent-soft;
+    }
+
+    .btn-on-navy,
+    .btn-on-brand {
+        @apply border border-white/50 text-white hover:border-white hover:bg-white/10;
+    }
+
+    /* Text links: underline grows left → right. */
+    .link-arrow,
+    .link-underline {
+        background-image: linear-gradient(currentColor, currentColor);
+        background-position: 0 100%;
+        background-repeat: no-repeat;
+        background-size: 0% 1px;
+        transition:
+            background-size 250ms var(--ease-editorial),
+            color 250ms var(--ease-editorial);
+    }
+
+    .link-arrow:hover,
+    .link-underline:hover {
+        background-size: 100% 1px;
+    }
+
+    .link-arrow {
+        @apply inline-flex items-center gap-2 self-start pb-0.5 text-[15px] font-bold text-accent-ink;
+    }
+
+    .link-underline:hover {
+        @apply text-accent-ink;
+    }
+
+    .chip {
+        @apply inline-flex h-7 items-center rounded-[4px] border border-line bg-canvas-deep px-2.5 text-xs font-semibold whitespace-nowrap text-ink;
+    }
+
+    .badge {
+        @apply inline-flex h-6 items-center gap-1.5 rounded-[4px] px-2.5 text-[11px] font-bold tracking-[0.12em] whitespace-nowrap uppercase;
+    }
+
+    .card-lift {
+        transition:
+            transform 350ms var(--ease-editorial),
+            border-color 350ms var(--ease-editorial),
+            box-shadow 350ms var(--ease-editorial);
+    }
+
+    .card-lift:hover {
+        @apply border-[#a98bf0] shadow-[0_18px_40px_-30px_rgba(27,27,47,0.5)];
+        transform: translateY(-4px);
+    }
+
+    .field-label {
+        @apply mb-2 block text-[13px] font-semibold text-ink;
+    }
+
+    .field-input {
+        @apply block h-14 w-full rounded-[6px] border border-line bg-white px-4 text-base text-ink transition placeholder:text-[#8b8f98] hover:border-[#a98bf0] focus:border-accent focus:ring-4 focus:ring-accent/10 focus:outline-none;
+    }
+
+    textarea.field-input {
+        @apply h-auto py-4 leading-normal;
+    }
+
+    .field-error {
+        @apply mt-1.5 text-[13px] text-danger;
+    }
+
+    .prose-vmn {
+        @apply text-base leading-[1.75] text-ink;
+    }
+
+    .prose-vmn h2 {
+        @apply mt-10 mb-3 font-display text-3xl font-semibold;
+    }
+
+    .prose-vmn h3 {
+        @apply mt-8 mb-2 font-display text-2xl font-semibold;
+    }
+
+    .prose-vmn p {
+        @apply mb-4;
+    }
+
+    .prose-vmn ul {
+        @apply mb-4 list-disc pl-6;
+    }
+
+    .prose-vmn ol {
+        @apply mb-4 list-decimal pl-6;
+    }
+
+    .prose-vmn a {
+        @apply text-accent-ink underline;
+    }
+
+    .prose-vmn strong {
+        @apply font-bold;
+    }
+
+    /* Admin */
+    .admin-input {
+        @apply block h-11 w-full rounded-[6px] border border-[#d6d2e6] bg-white px-3 text-[15px] text-ink focus:border-accent focus:ring-[3px] focus:ring-accent/20 focus:outline-none;
+    }
+
+    textarea.admin-input {
+        @apply h-auto py-2.5 leading-normal;
+    }
+
+    .admin-label {
+        @apply mb-1.5 block text-[13px] font-semibold text-[#4a4f59];
+    }
+
+    .admin-panel {
+        @apply rounded-[8px] border border-[#e6e4ef] bg-white p-6;
+    }
+}
