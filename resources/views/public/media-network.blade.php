@@ -75,6 +75,5 @@
         </div>
     </section>
 
-    <x-sample-report-cta :outlets="$summary->flatMap(fn ($s) => $s['examples'])->values()" />
     <x-cta-band />
 </x-layouts.public>

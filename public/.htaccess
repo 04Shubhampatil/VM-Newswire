@@ -23,3 +23,39 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# ---- Static asset caching -------------------------------------------------
+# Vite build files carry a content hash in the name: cache them for a year.
+<IfModule mod_headers.c>
+    <If "%{REQUEST_URI} =~ m#/build/assets/#">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
+    # Uploaded posters/logos (new upload = new filename) and site images/fonts.
+    <If "%{REQUEST_URI} !~ m#/build/assets/#">
+        <FilesMatch "\.(ico|svg|png|jpe?g|webp|gif|woff2?|ttf)$">
+            Header set Cache-Control "public, max-age=604800"
+        </FilesMatch>
+    </If>
+    Header always set X-Content-Type-Options "nosniff"
+    # Never serve a cached HTML page with another visitor's session.
+    <FilesMatch "\.(php|html)$">
+        Header set Cache-Control "no-cache, private"
+    </FilesMatch>
+</IfModule>
+
+# ---- Compression ----------------------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml text/javascript application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# ---- Hardening ------------------------------------------------------------
+# Block dotfiles (e.g. a stray .env) and source maps.
+<FilesMatch "^\.|\.map$">
+    Require all denied
+</FilesMatch>
+# Uploaded files can never execute as PHP.
+<IfModule mod_php.c>
+    <Directory "storage">
+        php_flag engine off
+    </Directory>
+</IfModule>

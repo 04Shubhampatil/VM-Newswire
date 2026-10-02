@@ -23,10 +23,10 @@
             <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-5">
                 @csrf
                 <div>
-                    <label for="email" class="field-label">Email</label>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username"
-                           class="field-input @error('email') border-danger @enderror" @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>
-                    @error('email')<p id="email-error" class="field-error">{{ $message }}</p>@enderror
+                    <label for="login" class="field-label">Username or email</label>
+                    <input id="login" name="login" type="text" value="{{ old('login') }}" required autofocus autocomplete="username"
+                           class="field-input @error('login') border-danger @enderror" @error('login') aria-invalid="true" aria-describedby="login-error" @enderror>
+                    @error('login')<p id="login-error" class="field-error">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label for="password" class="field-label">Password</label>

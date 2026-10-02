@@ -11,7 +11,7 @@ use Illuminate\Database\Seeder;
  * DEVELOPMENT / DEMO DATA ONLY.
  *
  * Package names and headline outlets come from the VM Newswire requirements.
- * Prices, package-to-outlet mappings and every "Demo Outlet" row are placeholders
+ * Prices and package-to-outlet mappings are placeholders
  * and do not represent confirmed commercial distribution. Replace in /admin.
  */
 class DemoCatalogSeeder extends Seeder
@@ -46,13 +46,7 @@ class DemoCatalogSeeder extends Seeder
             ]);
         }
 
-        $categories = config('vmnewswire.media_categories');
-        $demo = collect(range(1, 60))->map(fn (int $n) => MediaOutlet::create([
-            'name' => sprintf('Demo Outlet %03d', $n),
-            'category' => $categories[$n % count($categories)],
-            'display_order' => 100 + $n,
-        ]));
-
+        // Extended-network outlets are added by the owner in Admin → Media Network (or via CSV import).
         $standard = ['Major media distribution', 'Digital publication network', 'Professional reporting', 'Sample report'];
 
         $packages = [
@@ -60,38 +54,38 @@ class DemoCatalogSeeder extends Seeder
                 'name' => 'AccessWire', 'brand' => 'AccessWire', 'price' => 149,
                 'short_description' => 'Core newswire distribution for a single announcement.',
                 'distribution_summary' => 'AccessWire newswire plus the digital publication network',
-                'featured' => ['AccessWire'], 'network' => [1, 40],
+                'featured' => ['AccessWire'],
             ],
             [
                 'name' => 'AccessWire + BI + AP News', 'slug' => 'accesswire-bi-ap-news', 'brand' => 'AccessWire', 'price' => 399, 'is_highlighted' => true,
                 'short_description' => 'AccessWire distribution with Business Insider and AP News.',
                 'distribution_summary' => 'AccessWire, two premium placements and 200+ outlets',
                 'features' => ['AccessWire distribution', 'Business Insider placement', 'AP News placement', 'Digital publication network', 'Professional reporting', 'Sample report'],
-                'featured' => ['AccessWire', 'Business Insider', 'AP News', 'Yahoo Finance', 'Benzinga', 'StreetInsider', 'Digital Journal'], 'network' => [1, 60],
+                'featured' => ['AccessWire', 'Business Insider', 'AP News', 'Yahoo Finance', 'Benzinga', 'StreetInsider', 'Digital Journal'],
             ],
             [
                 'name' => 'GlobeNewswire Basic', 'brand' => 'GlobeNewswire', 'price' => 299,
                 'short_description' => 'GlobeNewswire distribution with network pickup.',
                 'distribution_summary' => 'GlobeNewswire plus the digital publication network',
-                'featured' => ['GlobeNewswire'], 'network' => [1, 40],
+                'featured' => ['GlobeNewswire'],
             ],
             [
                 'name' => 'GlobeNewswire New York Metro', 'slug' => 'globenewswire-new-york-metro', 'brand' => 'GlobeNewswire', 'price' => 449,
                 'short_description' => 'GlobeNewswire distribution focused on the New York metro area.',
                 'distribution_summary' => 'GlobeNewswire New York Metro circuit and regional media',
-                'featured' => ['GlobeNewswire'], 'network' => [20, 50],
+                'featured' => ['GlobeNewswire'],
             ],
             [
                 'name' => 'MSN', 'brand' => 'MSN', 'price' => 249,
                 'short_description' => 'Publication on MSN with extended network reach.',
                 'distribution_summary' => 'MSN plus the digital publication network',
-                'featured' => ['MSN'], 'network' => [1, 40],
+                'featured' => ['MSN'],
             ],
             [
                 'name' => 'USA Today', 'brand' => 'USA Today', 'price' => 499,
                 'short_description' => 'Publication on USA Today with extended network reach.',
                 'distribution_summary' => 'USA Today plus the digital publication network',
-                'featured' => ['USA Today'], 'network' => [1, 40],
+                'featured' => ['USA Today'],
             ],
         ];
 
@@ -113,10 +107,6 @@ class DemoCatalogSeeder extends Seeder
             $attach = [];
             foreach ($data['featured'] as $i => $name) {
                 $attach[$outlets[$name]->id] = ['is_featured' => true, 'display_order' => $i + 1];
-            }
-            [$from, $to] = $data['network'];
-            foreach ($demo->slice($from - 1, $to - $from + 1) as $i => $outlet) {
-                $attach[$outlet->id] = ['is_featured' => false, 'display_order' => 100 + $i];
             }
             $package->mediaOutlets()->attach($attach);
         }

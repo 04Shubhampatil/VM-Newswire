@@ -26,6 +26,17 @@ class ContentController extends Controller
         $posters = config('vmnewswire.posters');
 
         $data = $request->validate([
+            'hero_eyebrow' => ['nullable', 'string', 'max:80'],
+            'hero_headline' => ['nullable', 'string', 'max:120'],
+            'hero_headline_highlight' => ['nullable', 'string', 'max:120'],
+            'hero_text' => ['nullable', 'string', 'max:400'],
+            'hero_primary_label' => ['nullable', 'string', 'max:40'],
+            'hero_secondary_label' => ['nullable', 'string', 'max:40'],
+            'hero_trust_items' => ['nullable', 'string', 'max:300'],
+            'trust_strip_heading' => ['nullable', 'string', 'max:120'],
+            'packages_eyebrow' => ['nullable', 'string', 'max:80'],
+            'packages_heading' => ['nullable', 'string', 'max:160'],
+            'packages_text' => ['nullable', 'string', 'max:300'],
             'about_intro' => ['required', 'string', 'max:600'],
             'about_body' => ['nullable', 'string', 'max:10000'],
             'about_image' => [

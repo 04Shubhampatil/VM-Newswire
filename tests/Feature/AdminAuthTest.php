@@ -33,7 +33,7 @@ class AdminAuthTest extends TestCase
     {
         $admin = $this->admin(['email' => 'owner@example.com', 'password' => 'correct-horse-42-battery']);
 
-        $this->post('/login', ['email' => 'owner@example.com', 'password' => 'correct-horse-42-battery'])
+        $this->post('/login', ['login' => 'owner@example.com', 'password' => 'correct-horse-42-battery'])
             ->assertRedirect(route('admin.dashboard'));
         $this->assertAuthenticatedAs($admin);
 
@@ -41,11 +41,19 @@ class AdminAuthTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_admin_can_log_in_with_username(): void
+    {
+        $admin = $this->admin(['name' => 'admin', 'email' => 'admin@vmnewswire.test', 'password' => 'admin123']);
+
+        $this->post('/login', ['login' => 'Admin', 'password' => 'admin123'])->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticatedAs($admin);
+    }
+
     public function test_wrong_password_is_rejected(): void
     {
         $this->admin(['email' => 'owner@example.com']);
 
-        $this->post('/login', ['email' => 'owner@example.com', 'password' => 'wrong'])->assertSessionHasErrors('email');
+        $this->post('/login', ['login' => 'owner@example.com', 'password' => 'wrong'])->assertSessionHasErrors('login');
         $this->assertGuest();
     }
 
@@ -53,7 +61,7 @@ class AdminAuthTest extends TestCase
     {
         User::factory()->create(['email' => 'user@example.com', 'role' => 'editor', 'password' => 'secret-password-1']);
 
-        $this->post('/login', ['email' => 'user@example.com', 'password' => 'secret-password-1'])->assertSessionHasErrors('email');
+        $this->post('/login', ['login' => 'user@example.com', 'password' => 'secret-password-1'])->assertSessionHasErrors('login');
         $this->assertGuest();
     }
 
@@ -62,10 +70,10 @@ class AdminAuthTest extends TestCase
         $this->admin(['email' => 'owner@example.com']);
 
         foreach (range(1, 5) as $i) {
-            $this->post('/login', ['email' => 'owner@example.com', 'password' => 'wrong']);
+            $this->post('/login', ['login' => 'owner@example.com', 'password' => 'wrong']);
         }
 
-        $this->post('/login', ['email' => 'owner@example.com', 'password' => 'wrong'])->assertStatus(429);
+        $this->post('/login', ['login' => 'owner@example.com', 'password' => 'wrong'])->assertStatus(429);
     }
 
     public function test_admin_with_one_time_password_must_change_it(): void

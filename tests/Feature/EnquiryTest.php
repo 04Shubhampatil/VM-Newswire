@@ -176,6 +176,7 @@ class EnquiryTest extends TestCase
     public function test_emails_are_sent_to_admin_and_customer_and_logged(): void
     {
         Mail::fake();
+        config(['vmnewswire.admin_notification_email' => 'sales@vmnewswire.com']);
         $package = Package::factory()->create(['name' => 'MSN']);
 
         $this->post('/enquiries', $this->payload(['package_id' => $package->id]));

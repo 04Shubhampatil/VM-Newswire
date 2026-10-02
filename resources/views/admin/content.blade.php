@@ -3,6 +3,28 @@
         @csrf @method('PUT')
         <p class="text-sm text-muted">Long text fields support Markdown: <code class="font-mono">**bold**</code>, <code class="font-mono">*italic*</code>, <code class="font-mono">## Heading</code>, <code class="font-mono">- list item</code>, <code class="font-mono">[link](https://…)</code>. HTML is removed for safety.</p>
         <section class="admin-panel flex flex-col gap-5">
+            <h2 class="text-lg font-semibold">Home page — hero</h2>
+            <p class="-mt-3 text-sm text-muted">Leave a field empty to use the default wording.</p>
+            <x-admin.input name="hero_eyebrow" label="Eyebrow (small purple line)" :value="$settings->get('hero_eyebrow')" maxlength="80" />
+            <div class="grid gap-5 md:grid-cols-2">
+                <x-admin.input name="hero_headline" label="Headline" :value="$settings->get('hero_headline')" maxlength="120" />
+                <x-admin.input name="hero_headline_highlight" label="Headline highlight (purple, italic)" :value="$settings->get('hero_headline_highlight')" maxlength="120" />
+            </div>
+            <x-admin.textarea name="hero_text" label="Intro text" :value="$settings->get('hero_text')" rows="3" maxlength="400" />
+            <div class="grid gap-5 md:grid-cols-2">
+                <x-admin.input name="hero_primary_label" label="Primary button label" :value="$settings->get('hero_primary_label')" maxlength="40" />
+                <x-admin.input name="hero_secondary_label" label="Secondary button label" :value="$settings->get('hero_secondary_label')" maxlength="40" />
+            </div>
+            <x-admin.textarea name="hero_trust_items" label="Trust points (one per line; {network} inserts the network size from Settings)" :value="$settings->get('hero_trust_items')" rows="3" maxlength="300" />
+        </section>
+        <section class="admin-panel flex flex-col gap-5">
+            <h2 class="text-lg font-semibold">Home page — media strip &amp; packages</h2>
+            <x-admin.input name="trust_strip_heading" label="Media strip heading" :value="$settings->get('trust_strip_heading')" maxlength="120" />
+            <x-admin.input name="packages_eyebrow" label="Packages eyebrow" :value="$settings->get('packages_eyebrow')" maxlength="80" />
+            <x-admin.textarea name="packages_heading" label="Packages heading (a new line becomes a line break on desktop)" :value="$settings->get('packages_heading')" rows="2" maxlength="160" />
+            <x-admin.input name="packages_text" label="Packages description" :value="$settings->get('packages_text')" maxlength="300" />
+        </section>
+        <section class="admin-panel flex flex-col gap-5">
             <h2 class="text-lg font-semibold">About page</h2>
             <x-admin.textarea name="about_intro" label="Introduction" :value="$settings->get('about_intro')" rows="3" required />
             <x-admin.textarea name="about_body" label="Body" :value="$settings->get('about_body')" rows="6" />

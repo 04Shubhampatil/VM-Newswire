@@ -143,9 +143,59 @@ function initTimelines() {
     });
 }
 
+/** Eased smooth scrolling for same-page anchor links (header offset aware); falls back to a jump under reduced motion. */
+function initSmoothScroll() {
+    const headerOffset = () => (document.querySelector('header')?.offsetHeight ?? 76) + 16;
+    const easeOutQuint = (t) => 1 - Math.pow(1 - t, 5);
+
+    const scrollTo = (target, hash) => {
+        const start = window.scrollY;
+        const end = Math.max(0, target.getBoundingClientRect().top + start - headerOffset());
+        const distance = end - start;
+        if (reducedMotion.matches || Math.abs(distance) < 2) {
+            window.scrollTo(0, end);
+            if (hash) history.pushState(null, '', hash);
+            return;
+        }
+        const duration = Math.min(1100, 450 + Math.abs(distance) * 0.35);
+        const t0 = performance.now();
+        document.documentElement.style.scrollBehavior = 'auto';
+        const step = (now) => {
+            const p = Math.min(1, (now - t0) / duration);
+            window.scrollTo(0, start + distance * easeOutQuint(p));
+            if (p < 1) requestAnimationFrame(step);
+            else {
+                document.documentElement.style.removeProperty('scroll-behavior');
+                if (hash) history.pushState(null, '', hash);
+                if (target.tabIndex < 0) target.setAttribute('tabindex', '-1');
+                target.focus({ preventScroll: true });
+            }
+        };
+        requestAnimationFrame(step);
+    };
+
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest('a[href*="#"]');
+        if (!link || link.target === '_blank' || event.defaultPrevented || event.metaKey || event.ctrlKey) return;
+        const url = new URL(link.href, location.href);
+        if (url.origin !== location.origin || url.pathname !== location.pathname || url.hash.length < 2) return;
+        const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+        if (!target) return;
+        event.preventDefault();
+        scrollTo(target, url.hash);
+    });
+
+    // Arriving on a page with a hash: ease to it after layout instead of landing hard under the header.
+    if (location.hash.length > 1) {
+        const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        if (target) requestAnimationFrame(() => scrollTo(target, null));
+    }
+}
+
 export function initMotion() {
     initReveals();
     initScrollState();
     initParallax();
     initTimelines();
+    initSmoothScroll();
 }

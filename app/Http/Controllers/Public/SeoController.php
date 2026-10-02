@@ -18,7 +18,8 @@ class SeoController extends Controller
 
         return response()
             ->view('public.sitemap', ['urls' => $static->concat($packages)])
-            ->header('Content-Type', 'application/xml; charset=UTF-8');
+            ->header('Content-Type', 'application/xml; charset=UTF-8')
+            ->header('Cache-Control', 'public, max-age=3600');
     }
 
     public function robots(): Response
@@ -27,6 +28,6 @@ class SeoController extends Controller
             ? ['User-agent: *', 'Disallow: /admin', 'Disallow: /login', 'Sitemap: '.route('sitemap')]
             : ['User-agent: *', 'Disallow: /'];
 
-        return response(implode("\n", $lines)."\n")->header('Content-Type', 'text/plain; charset=UTF-8');
+        return response(implode("\n", $lines)."\n")->header('Content-Type', 'text/plain; charset=UTF-8')->header('Cache-Control', 'public, max-age=86400');
     }
 }

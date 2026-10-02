@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,20 +17,28 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
+    /**
+     * Signs in with either the username (the user's name, e.g. "admin") or the email address.
+     */
     public function store(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'string', 'email'],
+        $data = $request->validate([
+            'login' => ['required', 'string', 'max:190'],
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            throw ValidationException::withMessages(['email' => 'These credentials do not match our records.']);
+        $login = trim($data['login']);
+        $email = str_contains($login, '@')
+            ? strtolower($login)
+            : User::whereRaw('LOWER(name) = ?', [strtolower($login)])->value('email');
+
+        if (! $email || ! Auth::attempt(['email' => $email, 'password' => $data['password']], $request->boolean('remember'))) {
+            throw ValidationException::withMessages(['login' => 'These credentials do not match our records.']);
         }
 
         if (! $request->user()->isAdmin()) {
             Auth::logout();
-            throw ValidationException::withMessages(['email' => 'This account does not have admin access.']);
+            throw ValidationException::withMessages(['login' => 'This account does not have admin access.']);
         }
 
         $request->session()->regenerate();

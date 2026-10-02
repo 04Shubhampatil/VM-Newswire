@@ -34,7 +34,6 @@
         </div>
     </section>
 
-    <x-sample-report-cta :outlets="$packages->flatMap->featuredMedia->pluck('name')->unique()->values()" />
     <x-cta-band />
     <x-enquiry-modal :packages="$packages" />
     <x-report-modal />

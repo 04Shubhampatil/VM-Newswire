@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Faq;
+use App\Models\MediaOutlet;
 use App\Services\SiteSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -41,6 +42,42 @@ class AdminContentTest extends TestCase
             'network_size_label' => '200+',
             'social_linkedin' => 'javascript:alert(1)',
         ])->assertSessionHasErrors(['company_name', 'company_email', 'social_linkedin']);
+    }
+
+    public function test_home_page_copy_is_editable_from_website_content(): void
+    {
+        MediaOutlet::factory()->create(['is_highlighted' => true]);
+        $this->get('/')->assertSee('Put your story in front of')->assertSee('Six packages.')->assertSee('200+ Media Outlets')->assertSee('Trusted distribution across');
+
+        $this->actingAs($this->admin())->put(route('admin.content.update'), [
+            'hero_eyebrow' => 'Press release distribution',
+            'hero_headline' => 'Get your news in front of',
+            'hero_headline_highlight' => 'the right readers.',
+            'hero_text' => 'Custom hero text.',
+            'hero_primary_label' => 'See Packages',
+            'hero_secondary_label' => 'Talk to us',
+            'hero_trust_items' => "{network} outlets\n<b>Fast</b> turnaround",
+            'trust_strip_heading' => 'Seen on leading networks.',
+            'packages_eyebrow' => 'Our packages',
+            'packages_heading' => "Five packages.\nOne goal.",
+            'packages_text' => 'Pick the reach you need.',
+            'about_intro' => 'Intro.',
+            'footer_text' => 'Footer.',
+        ])->assertSessionHas('toast');
+
+        $this->get('/')
+            ->assertSee('Get your news in front of')
+            ->assertSee('the right readers.')
+            ->assertSee('Custom hero text.')
+            ->assertSee('See Packages')
+            ->assertSee('Talk to us')
+            ->assertSee('200+ outlets')
+            ->assertSee('&lt;b&gt;Fast&lt;/b&gt; turnaround', false)
+            ->assertSee('Seen on leading networks.')
+            ->assertSee('Our packages')
+            ->assertSee('Five packages.<br class="hidden md:block"> One goal.', false)
+            ->assertSee('Pick the reach you need.')
+            ->assertDontSee('Put your story in front of');
     }
 
     public function test_content_update_renders_sanitised_markdown(): void

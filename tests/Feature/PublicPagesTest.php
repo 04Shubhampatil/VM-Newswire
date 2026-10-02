@@ -160,6 +160,21 @@ class PublicPagesTest extends TestCase
             ->assertDontSee(route('packages.show', $inactive->slug), false);
     }
 
+    public function test_security_headers_are_sent_on_error_pages_too(): void
+    {
+        $this->get('/no-such-page')
+            ->assertNotFound()
+            ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    }
+
+    public function test_sitemap_and_robots_are_cacheable(): void
+    {
+        $this->get('/sitemap.xml')->assertOk()->assertHeader('Cache-Control', 'max-age=3600, public');
+        $this->get('/robots.txt')->assertOk()->assertHeader('Cache-Control', 'max-age=86400, public');
+    }
+
     public function test_robots_txt_is_served(): void
     {
         $this->get('/robots.txt')->assertOk()->assertSee('User-agent: *');

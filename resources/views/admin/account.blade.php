@@ -5,7 +5,7 @@
     <form method="POST" action="{{ route('admin.account.password.update') }}" class="admin-panel flex max-w-xl flex-col gap-5">
         @csrf @method('PUT')
         <x-admin.input name="current_password" label="Current password" type="password" autocomplete="current-password" required />
-        <x-admin.input name="password" label="New password" type="password" autocomplete="new-password" required help="At least 12 characters, with letters and numbers." />
+        <x-admin.input name="password" label="New password" type="password" autocomplete="new-password" required help="At least 8 characters, with letters and numbers." />
         <x-admin.input name="password_confirmation" label="Confirm new password" type="password" autocomplete="new-password" required />
         <button type="submit" class="btn btn-primary btn-sm self-start">Update password</button>
     </form>

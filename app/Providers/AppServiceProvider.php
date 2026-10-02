@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
         // Surface N+1 queries and silently discarded attributes during development.
         Model::shouldBeStrict(! $this->app->isProduction());
 
-        Password::defaults(fn () => Password::min(12)->letters()->numbers());
+        Password::defaults(fn () => Password::min(8)->letters()->numbers());
 
         // Settings load lazily, so sharing the instance costs nothing until a view reads it.
         View::share('site', $this->app->make(SiteSettings::class));
@@ -52,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         RateLimiter::for('login', fn (Request $request) => [
-            Limit::perMinute(5)->by('login:'.strtolower((string) $request->input('email')).'|'.$request->ip()),
+            Limit::perMinute(5)->by('login:'.strtolower((string) $request->input('login')).'|'.$request->ip()),
         ]);
     }
 }
