@@ -6,21 +6,17 @@
    Only transform / translate / scale / opacity / clip-path are animated.
    ========================================================================== */
 
-/* --- Header: transparent at top, frosted after scrolling ------------------ */
+/* --- Header: flat at top, shadowed after scrolling ------------------------ */
 .site-header {
     view-transition-name: site-header;
     transition:
-        background-color 300ms var(--ease-editorial),
-        border-color 300ms var(--ease-editorial),
-        box-shadow 300ms var(--ease-editorial);
+        box-shadow 300ms var(--ease-editorial),
+        border-color 300ms var(--ease-editorial);
 }
 
 .site-header[data-scrolled] {
-    background-color: rgb(255 255 255 / 0.86);
     border-color: var(--color-line);
-    box-shadow: 0 8px 24px -22px rgb(27 27 47 / 0.45);
-    -webkit-backdrop-filter: saturate(1.2) blur(10px);
-    backdrop-filter: saturate(1.2) blur(10px);
+    box-shadow: 0 10px 30px -22px rgb(11 22 40 / 0.55);
 }
 
 .nav-link {
@@ -99,159 +95,23 @@
     clip-path: inset(0 0 0 0);
 }
 
-/* --- Hero: one release → many outlets ------------------------------------- */
-.hn {
-    --mx: 0;
-    --my: 0;
+/* --- Hero copy: fades up on load (CSS only, staggered by --i) -------------- */
+.hero-in {
+    animation: hero-in 420ms var(--ease-editorial) calc(var(--i, 0) * 60ms) both;
 }
 
-.hn-orbit { translate: calc(var(--mx) * 2.5px) calc(var(--my) * 2.5px); }
-.hn-center { translate: calc(var(--mx) * 6px) calc(var(--my) * 6px); }
-.hn-outlet { translate: calc(var(--mx) * var(--depth, 4) * 1px) calc(var(--my) * var(--depth, 4) * 1px); }
-
-.hn-center-inner {
-    animation:
-        hn-appear 700ms var(--ease-editorial) both,
-        hn-float 6s ease-in-out 900ms infinite;
+@keyframes hero-in {
+    from { opacity: 0; transform: translateY(14px); }
 }
 
-.hn-line {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: hn-draw 700ms var(--ease-editorial) calc(var(--d) + 500ms) forwards;
-}
-
-.hn-node {
-    opacity: 0;
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: hn-node 500ms var(--ease-editorial) calc(var(--d) + 400ms) forwards;
-}
-
-.hn-pulse {
-    stroke-dasharray: 0.06 1;
-    stroke-dashoffset: 0.06;
-    opacity: 0;
-    animation: hn-pulse 9s linear calc(var(--d) + 3s) infinite;
-}
-
-.hn-outlet-inner {
-    animation: hn-in 650ms var(--ease-editorial) calc(var(--d) + 900ms) both;
-}
-
-.hn-status {
-    background: var(--color-line);
-    animation: hn-status 400ms ease calc(var(--d) + 1300ms) forwards;
-}
-
-@keyframes hn-appear {
-    from { opacity: 0; transform: translateY(10px) scale(0.98); }
-}
-
+/* --- Shared keyframes ----------------------------------------------------- */
 @keyframes hn-float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+    50% { transform: translateY(-4px); }
 }
 
 @keyframes hn-draw {
     to { stroke-dashoffset: 0; }
-}
-
-@keyframes hn-node {
-    0% { opacity: 0; transform: scale(0.2); }
-    60% { opacity: 1; transform: scale(1.5); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes hn-pulse {
-    0% { stroke-dashoffset: 0.06; opacity: 1; }
-    12% { stroke-dashoffset: -1; opacity: 1; }
-    13%, 100% { stroke-dashoffset: -1; opacity: 0; }
-}
-
-@keyframes hn-in {
-    from { opacity: 0; transform: translateY(15px); }
-}
-
-@keyframes hn-status {
-    to { background: var(--color-success); box-shadow: 0 0 0 3px rgb(63 143 99 / 0.15); }
-}
-
-/* --- Media marquee -------------------------------------------------------- */
-.marquee {
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-}
-
-.marquee-track {
-    display: flex;
-    width: max-content;
-    animation: marquee 40s linear infinite;
-}
-
-.marquee:hover .marquee-track,
-.marquee:focus-within .marquee-track {
-    animation-play-state: paused;
-}
-
-@keyframes marquee {
-    to { transform: translateX(-50%); }
-}
-
-/* --- Package card micro-interactions -------------------------------------- */
-.pkg-card {
-    --lift: 0px;
-    transform: translateY(var(--lift));
-    transition:
-        transform 380ms var(--ease-editorial),
-        border-color 380ms var(--ease-editorial),
-        box-shadow 380ms var(--ease-editorial);
-}
-
-.pkg-card:hover {
-    transform: translateY(calc(var(--lift) - 6px));
-    border-color: #A98BF0;
-    box-shadow: 0 22px 44px -34px rgb(27 27 47 / 0.5);
-}
-
-.pkg-card[data-featured]:hover {
-    border-color: var(--color-accent);
-}
-
-@media (min-width: 1280px) {
-    .pkg-card[data-featured] { --lift: -12px; }
-}
-
-.pkg-num { transition: color 300ms var(--ease-editorial); }
-.pkg-card:hover .pkg-num { color: var(--color-accent-ink); }
-
-.pkg-rule {
-    display: block;
-    height: 1px;
-    width: 48px;
-    background: var(--color-accent);
-    transform: scaleX(0);
-    transform-origin: 0 50%;
-    transition: transform 400ms var(--ease-editorial);
-}
-
-.pkg-card:hover .pkg-rule,
-.pkg-card[data-featured] .pkg-rule { transform: scaleX(1); }
-
-.pkg-card .chip { transition: transform 300ms var(--ease-editorial); }
-.pkg-card:hover .chip { transform: translateY(-1px); }
-
-.pkg-check svg {
-    opacity: 0.55;
-    transform: translateX(-2px);
-    transition: opacity 300ms var(--ease-editorial), transform 300ms var(--ease-editorial);
-    transition-delay: calc(var(--i, 0) * 60ms);
-}
-
-.pkg-card:hover .pkg-check svg,
-.pkg-card[data-featured] .pkg-check svg {
-    opacity: 1;
-    transform: none;
 }
 
 /* --- How-it-works progress timeline --------------------------------------- */
@@ -357,12 +217,6 @@ html:not(.js) .step-num { color: var(--color-ink); }
         transition: none;
     }
 
-    .hn-pulse,
-    .marquee-clone { display: none; }
-
-    .marquee { -webkit-mask-image: none; mask-image: none; }
-    .marquee-track { width: auto; flex-wrap: wrap; justify-content: center; row-gap: 12px; }
-
     .step-fill,
     .step-vfill { transform: none; transition: none; }
 
@@ -371,45 +225,8 @@ html:not(.js) .step-num { color: var(--color-ink); }
     .btn:hover,
     .btn:active { transform: none; }
 
-    .pkg-card:hover { transform: translateY(var(--lift)); }
-
     ::view-transition-old(root),
     ::view-transition-new(root) { animation: none; }
-}
-
-/* --- Poster cards (hero network) ------------------------------------------ */
-.poster-card {
-    cursor: pointer;
-    transition:
-        transform 300ms var(--ease-editorial),
-        border-color 300ms var(--ease-editorial),
-        box-shadow 300ms var(--ease-editorial);
-}
-
-.poster-card:hover,
-.poster-card:focus-visible {
-    transform: translateY(-4px);
-    border-color: #A98BF0;
-    box-shadow: 0 18px 32px -22px rgb(27 27 47 / 0.5);
-}
-
-.poster-img {
-    transition: transform 350ms var(--ease-editorial);
-}
-
-.poster-card:hover .poster-img { transform: scale(1.03); }
-
-.poster-label,
-.poster-name { transition: color 300ms var(--ease-editorial); }
-.poster-card:hover .poster-label { color: var(--color-accent-ink); }
-
-/* Fallback sits behind the image; it shows through when there is no <img> (or it failed and was removed). */
-.poster-fallback { z-index: 0; }
-.poster-media > .poster-img { position: relative; z-index: 1; }
-
-@media (prefers-reduced-motion: reduce) {
-    .poster-card:hover { transform: none; }
-    .poster-card:hover .poster-img { transform: none; }
 }
 
 /* --- Popover boxes: CSS-only entrance (plays each time the box is shown) --- */

@@ -24,14 +24,14 @@
 
             <div class="flex flex-col gap-8 lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start lg:gap-24">
                 <aside class="flex flex-col gap-5 lg:sticky lg:top-26">
-                    <div role="group" aria-label="FAQ categories" class="-mx-5 flex gap-2 overflow-x-auto px-5 md:mx-0 md:px-0 lg:flex-col lg:gap-1">
+                    <div role="group" aria-label="FAQ categories" class="-mx-4 flex gap-2 overflow-x-auto px-4 md:mx-0 md:px-0 lg:flex-col lg:gap-1">
                         @foreach (collect(['All'])->merge($categories) as $category)
                             <button type="button" @click="category = @js($category)" :aria-pressed="(category === @js($category)).toString()"
-                                    :class="category === @js($category) ? 'bg-ink text-white border-ink' : 'bg-white text-ink border-line hover:border-ink'"
+                                    :class="category === @js($category) ? 'bg-navy-900 text-white border-navy-900' : 'bg-white text-ink border-line hover:border-navy-900'"
                                     class="flex h-11 shrink-0 items-center rounded-[6px] border px-4 text-left text-sm font-semibold transition">{{ $category }}</button>
                         @endforeach
                     </div>
-                    <div class="hidden flex-col gap-3.5 rounded-card bg-brand p-6 text-canvas lg:flex">
+                    <div class="hidden flex-col gap-3.5 rounded-card bg-navy-900 p-6 text-canvas lg:flex">
                         <h2 class="display text-[28px] leading-tight text-canvas">Still have questions?</h2>
                         <p class="text-sm leading-relaxed text-muted-on-brand">Our team replies to every enquiry personally.</p>
                         <x-button :href="route('contact')" size="sm" class="h-12! w-full">Enquire Now</x-button>

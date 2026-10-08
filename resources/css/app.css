@@ -5,57 +5,217 @@
 @source '../../storage/framework/views/*.php';
 
 /*
- * VM Newswire design tokens — white pages, charcoal text, vivid purple accent.
- * `accent` (emphasis, rules, large type) · `accent-ink` (small purple text, 6.6:1 on white)
- * `accent-fill` (buttons, 4.9:1 with white text) · `brand` (full-width purple bands).
- * `static` always emits the tokens, because motion.css reads them with var().
+ * VM Newswire design tokens (public website redesign).
+ * Premium editorial / enterprise press-release website: deep navy + corporate blue + teal accent,
+ * warm amber reserved for the primary conversion CTA, light blue-gray canvas and white cards.
+ *
+ * The tokens below are the *base* palette (also used by the admin dashboard, which stays unchanged).
+ * The public site re-declares the same tokens on `body.site-public` further down this file, so the
+ * public redesign never leaks into /admin.
+ *
+ * Typography: Inter — 400 body, 500/600 UI and headings, 700 for the hero.
  */
 @theme static {
     --font-sans: var(--font-vmn-body), 'Helvetica Neue', Arial, sans-serif;
     --font-display: var(--font-vmn-body), 'Helvetica Neue', Arial, sans-serif;
+    --font-serif: var(--font-vmn-body), 'Helvetica Neue', Arial, sans-serif;
     --font-mono: var(--font-vmn-mono), 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
+    /* Main backgrounds: white + light neutral gray. */
     --color-canvas: #ffffff;
-    --color-canvas-deep: #f3f0fa;
-    --color-ink: #1b1b2f;
-    --color-brand: #7c3aed;
-    --color-brand-soft: #6d28d9;
-    --color-brand-line: #9d7cf0;
-    --color-accent: #7c3aed;
-    --color-accent-ink: #6d28d9;
-    --color-accent-fill: #7c3aed;
-    --color-accent-fill-hover: #6d28d9;
-    --color-accent-soft: #f1eafe;
-    --color-accent-on-brand: #e9dcff;
-    --color-muted: #5b5f73;
-    --color-muted-on-brand: #e6ddff;
-    --color-line: #e6e4ef;
-    --color-line-soft: #efedf6;
-    --color-success: #3f8f63;
-    --color-success-ink: #2f7550;
-    --color-success-soft: #e4f1e9;
-    --color-danger: #b42318;
-    --color-danger-soft: #fdecea;
+    --color-canvas-deep: #f5f7fa;
+    --color-lavender: #f5f7fa;
+    --color-tier: #f5f7fa;
 
-    --radius-card: 8px;
+    /* Typography: deep navy for text hierarchy, secondary for subtler elements. */
+    --color-ink: #172033;
+    --color-heading: #0b1628;
+    --color-muted: #667085;
+    --color-muted-soft: #9ca3af;
+    --color-muted-on-brand: #a8b7c9;
+
+    /* Navy palette: primary dark brand color for header, footer, dark sections. */
+    --color-navy-700: #172033;
+    --color-navy-800: #07101e;
+    --color-navy-900: #0b1628;
+    --color-navy-950: #07101e;
+
+    /* Primary accent: professional blue. Guides attention, indicates action. */
+    --color-brand: #2563eb;
+    --color-brand-soft: #1d4ed8;
+    --color-brand-line: #3b82f6;
+    --color-accent: #2563eb;
+    --color-accent-ink: #2563eb;
+    --color-accent-fill: #2563eb;
+    --color-accent-fill-hover: #1d4ed8;
+    --color-accent-soft: #eff6ff;
+    --color-accent-on-brand: #dbeafe;
+
+    /* Brand-only colours used by the public site (declared here so Tailwind generates the utilities). */
+    --color-teal: #18b6a4;
+    --color-teal-soft: #e3f7f4;
+    --color-cta: #f4b63f;
+    --color-cta-hover: #e5a528;
+    --color-cta-ink: #0b1628;
+
+    /* Borders and subtle dividers. */
+    --color-line: #d9e0ea;
+    --color-line-soft: #e5eaf0;
+
+    /* Status colors. */
+    --color-success: #16a34a;
+    --color-success-ink: #166534;
+    --color-success-soft: #f0fdf4;
+    --color-danger: #dc2626;
+    --color-danger-soft: #fef2f2;
+
+    /* Package tier colours (used sparingly by the pricing cards). */
+    --color-tier-1: #7c3aed;
+    --color-tier-2: #db2777;
+    --color-tier-3: #ea580c;
+    --color-tier-4: #0284c7;
+    --color-tier-5: #16a34a;
+    --color-tier-6: #7c2d12;
+
+    --radius-card: 10px;
     --radius-control: 6px;
 
+    --shadow-card: 0 1px 2px 0 rgb(15 22 40 / 0.05);
+    --shadow-elevated: 0 10px 25px -5px rgb(15 22 40 / 0.1);
+    --shadow-modal: 0 25px 50px -12px rgb(15 22 40 / 0.25);
+
     --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * ---------------------------------------------------------------------------
+ * PUBLIC SITE PALETTE
+ * ---------------------------------------------------------------------------
+ * Declared unlayered so it wins over the `:root` tokens above, and scoped to
+ * `body.site-public` (applied by x-layouts.public) so /admin keeps the default
+ * palette untouched.
+ *
+ *   Primary      #0B1628  deep navy      headings, dark bands, footer, solid buttons
+ *   Secondary    #123B5D  corporate blue solid utility buttons, brand blocks
+ *   Accent       #18B6A4  teal           decorative shapes, rules, dark-band accents
+ *   Accent (ink) #0C7C6E  teal           accessible teal for links, eyebrows, icons
+ *   CTA          #F4B63F  warm amber     the single conversion CTA colour
+ *   Canvas       #F5F9FC  light blue     page background
+ *   Cards        #FFFFFF               cards and white bands
+ *   Text         #10233F / #526579      primary / secondary
+ *   Borders      #DCE5EC
+ * ---------------------------------------------------------------------------
+ */
+body.site-public {
+    --color-canvas: #f5f9fc;
+    --color-canvas-deep: #eaf1f7;
+    --color-lavender: #f5f9fc;
+    --color-tier: #eaf1f7;
+
+    --color-ink: #10233f;
+    --color-heading: #0b1628;
+    --color-muted: #526579;
+    --color-muted-soft: #7c8ca0;
+    --color-muted-on-brand: #9fb1c4;
+
+    --color-navy-700: #123b5d;
+    --color-navy-800: #08111f;
+    --color-navy-900: #0b1628;
+    --color-navy-950: #060d18;
+
+    --color-brand: #123b5d;
+    --color-brand-soft: #1a4e77;
+    --color-brand-line: #2b6390;
+    --color-accent: #0e8c7e;
+    --color-accent-ink: #0c7c6e;
+    --color-accent-fill: #123b5d;
+    --color-accent-fill-hover: #0e2f4c;
+    --color-accent-soft: #e7f4f2;
+    --color-accent-on-brand: #6fe0d2;
+
+    --color-line: #dce5ec;
+    --color-line-soft: #e7eef4;
+
+    --color-teal: #18b6a4;
+    --color-teal-soft: #e3f7f4;
+    --color-cta: #f4b63f;
+    --color-cta-hover: #e5a528;
+    --color-cta-ink: #0b1628;
+
+    --radius-card: 16px;
+    --radius-control: 12px;
+
+    --shadow-card: 0 1px 2px 0 rgb(11 22 40 / 0.04), 0 1px 3px 0 rgb(11 22 40 / 0.04);
+    --shadow-elevated: 0 14px 34px -14px rgb(11 22 40 / 0.18);
+    --shadow-float: 0 18px 40px -18px rgb(11 22 40 / 0.28);
+}
+
+/* Admin panel palette: same navy/teal brand as the public site, navy solid buttons, 12px cards. */
+body.site-admin {
+    --color-canvas: #f4f7fa;
+    --color-canvas-deep: #e9eff5;
+    --color-lavender: #f4f7fa;
+    --color-tier: #e9eff5;
+
+    --color-ink: #10233f;
+    --color-heading: #0b1628;
+    --color-muted: #526579;
+    --color-muted-soft: #7c8ca0;
+    --color-muted-on-brand: #9fb1c4;
+
+    --color-navy-700: #123b5d;
+    --color-navy-800: #08111f;
+    --color-navy-900: #0b1628;
+    --color-navy-950: #060d18;
+
+    --color-brand: #123b5d;
+    --color-brand-soft: #1a4e77;
+    --color-brand-line: #2b6390;
+    --color-accent: #0e8c7e;
+    --color-accent-ink: #0c7c6e;
+    --color-accent-fill: #0b1628;
+    --color-accent-fill-hover: #123b5d;
+    --color-accent-soft: #e7f4f2;
+    --color-accent-on-brand: #6fe0d2;
+
+    --color-line: #dce5ec;
+    --color-line-soft: #e7eef4;
+
+    --color-teal: #18b6a4;
+    --color-teal-soft: #e3f7f4;
+    --color-cta: #f4b63f;
+    --color-cta-hover: #e5a528;
+    --color-cta-ink: #0b1628;
+
+    --radius-card: 12px;
+    --radius-control: 8px;
+
+    --shadow-card: 0 1px 2px 0 rgb(11 22 40 / 0.04), 0 1px 3px 0 rgb(11 22 40 / 0.04);
+    --shadow-elevated: 0 14px 34px -14px rgb(11 22 40 / 0.18);
+    --shadow-float: 0 18px 40px -18px rgb(11 22 40 / 0.28);
 }
 
 @layer base {
     html {
         -webkit-font-smoothing: antialiased;
         scroll-behavior: smooth;
-        scroll-padding-top: 92px;
+        scroll-padding-top: 110px;
     }
 
     body {
-        @apply bg-canvas font-sans text-ink;
+        @apply bg-canvas font-sans text-[16px] leading-[1.65] text-muted;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        @apply font-sans font-semibold tracking-[-0.01em] text-heading;
+        text-wrap: balance;
     }
 
     ::selection {
-        @apply bg-accent-soft text-ink;
+        @apply bg-accent-soft text-heading;
     }
 
     :focus-visible {
@@ -69,57 +229,157 @@
 }
 
 @layer components {
-    /* 1280px of content, with 20px (mobile) / 32px (tablet and up) side padding. */
+    /* 1280px container with 16 / 24 / 32px gutters. */
     .container-site {
-        @apply mx-auto w-full max-w-[1344px] px-5 md:px-8;
+        @apply mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-8;
     }
 
-    /* Section rhythm: 80 mobile · 112 tablet · 144 desktop */
+    /* Section rhythm: 64 mobile · 96 tablet · 112 desktop (8px system). */
     .section-y {
-        @apply py-20 md:py-28 lg:py-36;
+        @apply py-16 sm:py-20 lg:py-28;
     }
 
-    /* Small purple label above headings (the reference uses plain purple text, no rule). */
-    .eyebrow {
-        @apply flex items-center gap-3 text-[13px] font-semibold tracking-[0.02em] text-accent-ink;
+    /* Tracked uppercase label above a section heading. */
+    .eyebrow,
+    .kicker {
+        @apply text-[12px] font-semibold tracking-[0.16em] text-accent-ink uppercase;
     }
 
     .eyebrow-dark {
         @apply text-accent-on-brand;
     }
 
-    /* Headings: semibold sans; <em> inside a heading is the purple-underlined key phrase. */
-    .display {
-        @apply font-display font-semibold tracking-[-0.02em];
+    .card {
+        @apply rounded-card border border-line bg-white;
     }
 
+    .card-elevated {
+        @apply rounded-card border border-line bg-white;
+        box-shadow: var(--shadow-elevated);
+    }
+
+    /* Display headings. <em> is the highlighted key phrase (never italic). */
+    .headline,
+    .display {
+        @apply font-sans font-semibold tracking-[-0.015em] text-heading;
+        text-wrap: balance;
+    }
+
+    .headline em,
     .display em {
-        font-style: normal;
-        color: var(--color-accent-ink);
-        text-decoration: underline;
-        text-decoration-color: var(--color-accent);
-        text-decoration-thickness: 3px;
-        text-underline-offset: 0.14em;
+        @apply font-semibold text-accent-ink not-italic;
+    }
+
+    .headline.em-light em {
+        @apply font-medium not-italic;
     }
 
     .text-canvas .display em,
     .display.text-canvas em,
-    .text-white .display em {
-        color: inherit;
-        text-decoration-color: currentColor;
+    .text-white .display em,
+    .text-white .headline em {
+        color: var(--color-accent-on-brand);
+    }
+
+    /* Hero title: very large, bold, tight tracking. */
+    .hero-title {
+        @apply font-sans text-[40px] leading-[1.05] font-bold tracking-[-0.03em] text-heading sm:text-[52px] lg:text-[64px];
+        text-wrap: balance;
+    }
+
+    .hero-title em {
+        @apply font-bold text-accent-ink not-italic;
+    }
+
+    .dot-pattern,
+    .dot-grid {
+        background-image: radial-gradient(rgb(18 59 93 / 0.12) 1px, transparent 1.2px);
+        background-size: 22px 22px;
+    }
+
+    .halo-glow {
+        background: radial-gradient(circle 500px at 50% 30%, rgb(24 182 164 / 0.08), transparent 70%);
+    }
+
+    /* Deep navy band with a single flat teal rule (used by CTA blocks). */
+    .band-navy {
+        background-color: var(--color-navy-900);
+        background-image:
+            radial-gradient(circle at 88% 12%, rgb(24 182 164 / 0.16) 0, transparent 38%),
+            radial-gradient(circle at 6% 92%, rgb(18 59 93 / 0.55) 0, transparent 45%);
+    }
+
+    /* Compact enquiry form on the navy card: 40px fields, 12px labels. */
+    .form-compact .field-label {
+        @apply mb-1 text-xs font-medium text-slate-300;
+    }
+
+    .form-compact .field-label span {
+        @apply text-slate-500;
+    }
+
+    .form-compact .field-input {
+        @apply h-10 rounded-[10px] border-white/15 bg-white/[0.06] px-3 text-xs text-white placeholder:text-slate-400 hover:border-white/35 focus:border-accent-on-brand focus:ring-1 focus:ring-accent-on-brand;
+    }
+
+    .form-compact textarea.field-input {
+        @apply h-auto py-2 leading-relaxed;
+    }
+
+    .form-compact select.field-input {
+        @apply text-slate-300;
+    }
+
+    .form-compact select.field-input option {
+        @apply text-ink;
+    }
+
+    .form-compact .field-error {
+        @apply text-[11px] text-[#ffb4ab];
+    }
+
+    /* Enquiry form inside a dark (navy) card. */
+    .on-dark .field-label {
+        @apply text-white;
+    }
+
+    .on-dark .field-label span {
+        @apply text-white/60;
+    }
+
+    .on-dark .field-input {
+        @apply border-white/15 bg-white/[0.06] text-white placeholder:text-white/40 hover:border-white/35 focus:border-accent-on-brand focus:ring-white/10;
+    }
+
+    .on-dark select.field-input option {
+        @apply text-ink;
+    }
+
+    .on-dark .text-muted {
+        @apply text-white/70;
+    }
+
+    .on-dark .field-error {
+        @apply text-[#ffb4ab];
+    }
+
+    .status-dot {
+        @apply inline-block size-1.5 shrink-0 rounded-full bg-success;
+        box-shadow: 0 0 0 3px rgb(63 143 99 / 0.15);
     }
 
     .label-caps {
-        @apply text-[11px] font-bold tracking-[0.12em] text-muted uppercase;
+        @apply text-[11px] font-semibold tracking-[0.16em] text-muted-soft uppercase;
     }
 
-    /* Buttons: darken + lift 1px on hover, press down 1px, trailing arrow slides 4px. */
+    /* Buttons: pill shape, sentence case, 52px (44px for the small size). */
     .btn {
-        @apply inline-flex h-[52px] items-center justify-center gap-2.5 rounded-[6px] px-6 text-[15px] font-semibold whitespace-nowrap focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50;
+        @apply inline-flex h-[52px] items-center justify-center gap-2 rounded-full px-7 text-[15px] font-semibold whitespace-nowrap focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50;
         transition:
             background-color 250ms var(--ease-editorial),
             border-color 250ms var(--ease-editorial),
             color 250ms var(--ease-editorial),
+            box-shadow 250ms var(--ease-editorial),
             transform 250ms var(--ease-editorial);
     }
 
@@ -128,7 +388,7 @@
     }
 
     .btn:active {
-        transform: translateY(1px);
+        transform: translateY(0);
     }
 
     .btn > svg:last-child:not(:first-child),
@@ -138,31 +398,131 @@
     }
 
     .btn:hover > svg:last-child:not(:first-child),
+    .btn:hover .arrow-nudge,
     .link-arrow:hover > svg:last-child,
     .group:hover .arrow-nudge {
         transform: translateX(4px);
     }
 
     .btn-sm {
-        @apply h-11 px-4 text-sm;
+        @apply h-11 px-5 text-[14px];
     }
 
+    /* Standard solid button: deep navy → corporate blue on hover. */
     .btn-primary,
     .btn-dark {
-        @apply bg-accent-fill text-white hover:bg-accent-fill-hover;
+        @apply bg-navy-900 text-white shadow-[0_10px_24px_-16px_rgba(11,22,40,0.9)] hover:bg-brand;
     }
 
+    /* The single conversion CTA: warm amber with deep navy text. */
+    .btn-cta {
+        @apply bg-cta text-cta-ink shadow-[0_10px_24px_-14px_rgba(244,182,63,0.9)] hover:bg-cta-hover;
+    }
+
+    /* Light secondary: white with a border. */
     .btn-secondary {
-        @apply border border-[#c9bff0] bg-white text-accent-ink hover:border-accent hover:bg-accent-soft;
+        @apply border border-line bg-white text-heading hover:border-[#b9c7d4] hover:bg-white;
     }
 
     .btn-on-navy,
     .btn-on-brand {
-        @apply border border-white/50 text-white hover:border-white hover:bg-white/10;
+        @apply bg-white text-heading hover:bg-teal-soft;
     }
 
-    /* Text links: underline grows left → right. */
-    .link-arrow,
+    .btn-outline {
+        @apply border border-accent text-accent-ink hover:bg-accent-soft;
+    }
+
+    /* Pill button with a trailing navy circle holding the arrow (homepage reference style). */
+    .btn-pill {
+        @apply inline-flex h-12 items-center justify-center gap-3 rounded-full pr-2 pl-6 text-[15px] font-semibold whitespace-nowrap transition;
+    }
+
+    .btn-pill-icon {
+        @apply flex size-8 shrink-0 items-center justify-center rounded-full bg-navy-900 text-white transition-transform;
+    }
+
+    .btn-pill:hover .btn-pill-icon {
+        transform: translateX(3px);
+    }
+
+    .btn-teal {
+        @apply text-white shadow-[0_12px_26px_-12px_rgba(24,182,164,0.85)];
+        background-image: linear-gradient(90deg, #19b4a1 0%, #0f9a89 100%);
+    }
+
+    .btn-teal:hover {
+        background-image: linear-gradient(90deg, #15a593 0%, #0d8b7c 100%);
+    }
+
+    .btn-ghost {
+        @apply border border-line bg-white text-heading hover:border-teal;
+    }
+
+    /* Soft mint glow behind the right half of a hero. */
+    .hero-glow {
+        @apply pointer-events-none absolute inset-y-0 right-0 w-[58%];
+        background: radial-gradient(ellipse 75% 90% at 85% 30%, #dcf4ee 0%, #edf9f6 45%, rgb(255 255 255 / 0) 78%);
+    }
+
+    /* Continuous logo marquee: two identical tracks slide left by one track width, then loop. */
+    .marquee {
+        @apply flex w-full overflow-hidden;
+        mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+        -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    }
+
+    .marquee-track {
+        @apply flex shrink-0 items-center gap-16 pr-16 lg:gap-24 lg:pr-24;
+        animation: marquee var(--marquee-duration, 30s) linear infinite;
+    }
+
+    .marquee:hover .marquee-track {
+        animation-play-state: paused;
+    }
+
+    @keyframes marquee {
+        to {
+            transform: translateX(-100%);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .marquee {
+            @apply flex-wrap justify-center;
+            mask-image: none;
+            -webkit-mask-image: none;
+        }
+
+        .marquee-track {
+            @apply flex-wrap justify-center gap-10 pr-0;
+            animation: none;
+        }
+
+        .marquee-track[aria-hidden='true'] {
+            display: none;
+        }
+    }
+
+    /* Short teal rule above section headings. */
+    .accent-bar {
+        @apply block h-1 w-10 rounded-full bg-teal;
+    }
+
+    .home-h2 {
+        @apply text-[30px] leading-[1.15] font-bold tracking-[-0.02em] text-heading sm:text-[36px];
+    }
+
+    /* Text link with an arrow that nudges on hover. */
+    .link-arrow {
+        @apply inline-flex items-center gap-2 self-start text-[15px] font-semibold text-accent-ink transition hover:text-brand;
+    }
+
+    /* Tracked uppercase text link with a rule beneath. */
+    .link-caps {
+        @apply inline-flex items-center gap-2 self-start border-b border-accent pb-2 text-[12px] font-semibold tracking-[0.2em] text-accent-ink uppercase transition hover:border-brand hover:text-brand;
+    }
+
     .link-underline {
         background-image: linear-gradient(currentColor, currentColor);
         background-position: 0 100%;
@@ -173,25 +533,17 @@
             color 250ms var(--ease-editorial);
     }
 
-    .link-arrow:hover,
     .link-underline:hover {
         background-size: 100% 1px;
-    }
-
-    .link-arrow {
-        @apply inline-flex items-center gap-2 self-start pb-0.5 text-[15px] font-bold text-accent-ink;
-    }
-
-    .link-underline:hover {
         @apply text-accent-ink;
     }
 
     .chip {
-        @apply inline-flex h-7 items-center rounded-[4px] border border-line bg-canvas-deep px-2.5 text-xs font-semibold whitespace-nowrap text-ink;
+        @apply inline-flex h-7 items-center rounded-full border border-line bg-white px-3 text-xs font-medium whitespace-nowrap text-ink;
     }
 
     .badge {
-        @apply inline-flex h-6 items-center gap-1.5 rounded-[4px] px-2.5 text-[11px] font-bold tracking-[0.12em] whitespace-nowrap uppercase;
+        @apply inline-flex h-6 items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold tracking-[0.1em] whitespace-nowrap uppercase;
     }
 
     .card-lift {
@@ -202,16 +554,17 @@
     }
 
     .card-lift:hover {
-        @apply border-[#a98bf0] shadow-[0_18px_40px_-30px_rgba(27,27,47,0.5)];
-        transform: translateY(-4px);
+        @apply border-brand-line;
+        box-shadow: var(--shadow-elevated);
+        transform: translateY(-3px);
     }
 
     .field-label {
-        @apply mb-2 block text-[13px] font-semibold text-ink;
+        @apply mb-2 block text-[13px] font-medium text-ink;
     }
 
     .field-input {
-        @apply block h-14 w-full rounded-[6px] border border-line bg-white px-4 text-base text-ink transition placeholder:text-[#8b8f98] hover:border-[#a98bf0] focus:border-accent focus:ring-4 focus:ring-accent/10 focus:outline-none;
+        @apply block h-13 w-full rounded-[12px] border border-line bg-white px-4 text-base text-ink transition placeholder:text-[#8b8f98] hover:border-brand-line focus:border-accent focus:ring-4 focus:ring-accent/10 focus:outline-none;
     }
 
     textarea.field-input {
@@ -223,15 +576,15 @@
     }
 
     .prose-vmn {
-        @apply text-base leading-[1.75] text-ink;
+        @apply text-base leading-[1.75] text-muted;
     }
 
     .prose-vmn h2 {
-        @apply mt-10 mb-3 font-display text-3xl font-semibold;
+        @apply mt-10 mb-3 text-[30px] leading-tight font-semibold text-heading;
     }
 
     .prose-vmn h3 {
-        @apply mt-8 mb-2 font-display text-2xl font-semibold;
+        @apply mt-8 mb-2 text-[22px] leading-tight font-semibold text-heading;
     }
 
     .prose-vmn p {
@@ -251,23 +604,96 @@
     }
 
     .prose-vmn strong {
-        @apply font-bold;
+        @apply font-semibold text-heading;
     }
 
-    /* Admin */
+    /* ---------------------------------------------------------------- */
+    /* Admin panel                                                        */
+    /* ---------------------------------------------------------------- */
+
+    /* Compact 8px-radius buttons inside the admin (the public site uses pills). */
+    .site-admin .btn {
+        @apply h-10 rounded-[8px] px-4 text-[14px];
+    }
+
+    .site-admin .btn-sm {
+        @apply h-9 px-3.5 text-[13px];
+    }
+
+    .site-admin .btn:hover {
+        transform: none;
+    }
+
     .admin-input {
-        @apply block h-11 w-full rounded-[6px] border border-[#d6d2e6] bg-white px-3 text-[15px] text-ink focus:border-accent focus:ring-[3px] focus:ring-accent/20 focus:outline-none;
+        @apply block h-10 w-full rounded-[8px] border border-line bg-white px-3 text-[14px] text-ink transition placeholder:text-muted-soft hover:border-[#b9c7d4] focus:border-accent focus:ring-[3px] focus:ring-accent/15 focus:outline-none;
     }
 
     textarea.admin-input {
-        @apply h-auto py-2.5 leading-normal;
+        @apply h-auto py-2.5 leading-relaxed;
+    }
+
+    .admin-input[type='file'] {
+        @apply h-auto py-1.5 file:mr-3 file:rounded-[6px] file:border-0 file:bg-canvas-deep file:px-3 file:py-1 file:text-[13px] file:font-medium file:text-ink;
     }
 
     .admin-label {
-        @apply mb-1.5 block text-[13px] font-semibold text-[#4a4f59];
+        @apply mb-1.5 block text-[13px] font-semibold text-heading;
+    }
+
+    .admin-help {
+        @apply mt-1.5 text-xs leading-relaxed text-muted;
     }
 
     .admin-panel {
-        @apply rounded-[8px] border border-[#e6e4ef] bg-white p-6;
+        @apply rounded-card border border-line bg-white p-6 shadow-card;
+    }
+
+    .admin-panel-title {
+        @apply text-[16px] leading-tight font-semibold text-heading;
+    }
+
+    .admin-nav-group {
+        @apply px-3 pt-6 pb-2 text-[11px] font-semibold tracking-[0.14em] text-white/40 uppercase;
+    }
+
+    .admin-nav-link {
+        @apply flex h-10 items-center gap-3 rounded-[8px] px-3 text-[14px] font-medium text-white/70 transition hover:bg-white/8 hover:text-white;
+    }
+
+    .admin-nav-link[aria-current='page'] {
+        @apply bg-white/10 text-white;
+    }
+
+    .admin-nav-link[aria-current='page'] > svg {
+        @apply text-teal;
+    }
+
+    /* Filter chips / counted tabs (e.g. All · New · Contacted). */
+    .admin-chip {
+        @apply inline-flex h-8 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 text-[12px] font-semibold text-ink transition hover:border-[#b9c7d4];
+    }
+
+    .admin-chip[aria-current='page'] {
+        @apply border-navy-900 bg-navy-900 text-white;
+    }
+
+    .admin-chip-count {
+        @apply rounded-full bg-canvas-deep px-1.5 text-[11px] text-muted;
+    }
+
+    .admin-chip[aria-current='page'] .admin-chip-count {
+        @apply bg-white/15 text-white;
+    }
+
+    .admin-link {
+        @apply text-[13px] font-semibold text-accent-ink hover:underline;
+    }
+
+    .admin-link-danger {
+        @apply text-[13px] font-semibold text-danger hover:underline;
+    }
+
+    .admin-icon-btn {
+        @apply flex size-8 items-center justify-center rounded-[6px] border border-line bg-white text-muted transition hover:border-[#b9c7d4] hover:text-heading disabled:cursor-not-allowed disabled:opacity-30;
     }
 }

@@ -66,15 +66,18 @@ class CatalogCache
         }));
     }
 
+    public const HOMEPAGE_CARD_LIMIT = 8;
+
     /**
-     * Outlets shown in the hero network and media strip, with their poster data.
+     * Outlets shown as the homepage news cards: the most recently added of those the admin marked
+     * "Show on homepage", newest first, capped at HOMEPAGE_CARD_LIMIT.
      *
      * @return Collection<int, object{id: int, name: string, slug: string, category: string, short_description: ?string, description: ?string, poster_src: ?string, poster_width: ?int, poster_height: ?int, website_url: ?string}>
      */
     public static function highlightedOutlets(): Collection
     {
         $rows = Cache::remember('catalog.highlighted_outlets', 3600, fn () => MediaOutlet::active()
-            ->where('is_highlighted', true)->ordered()->limit(8)
+            ->where('is_highlighted', true)->orderByDesc('created_at')->orderByDesc('id')->limit(self::HOMEPAGE_CARD_LIMIT)
             ->get()->map->toPosterArray()->all());
 
         return collect($rows)->map(fn (array $row) => (object) $row);

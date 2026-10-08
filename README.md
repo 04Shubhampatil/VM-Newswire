@@ -11,18 +11,29 @@ The owner manages everything from `/admin`: packages, prices, media outlets (inc
 | PHP | 8.3+ (developed on 8.4) with `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`, `curl`, `intl`, `zip`, `gd` |
 | Laravel | 13 |
 | Composer | 2.x |
-| Node.js | 20+ (developed on 22), npm 10+ |
 | MySQL | 8.0+ (SQLite also works for local development and is used by the tests) |
+
+No Node.js or npm is needed: the stylesheet, fonts and JavaScript ship pre-compiled.
 
 ## Stack
 
-Laravel 13 (Blade, Eloquent, Form Requests, Mail, queues, Storage) · Tailwind CSS 4 · Alpine.js · Vite. Fonts (Cormorant Garamond, Manrope, IBM Plex Mono) are downloaded at build time and self-hosted by the Vite font plugin.
+Laravel 13 (Blade, Eloquent, Form Requests, Mail, queues, Storage) · Tailwind CSS 4 (pre-compiled) · Alpine.js. Fonts (Inter, IBM Plex Mono) are self-hosted from `public/fonts`.
+
+Front-end assets are plain files served by Laravel — no build step:
+
+| File | Purpose |
+|---|---|
+| `public/css/app.css` | Compiled Tailwind stylesheet (source: `resources/css/app.css`, `resources/css/motion.css`) |
+| `public/css/fonts.css` | `@font-face` rules for the self-hosted fonts |
+| `public/js/app.js` | Compiled Alpine.js bundle (source: `resources/js/app.js`, `motion.js`, `analytics.js`) |
+| `resources/views/partials/head-assets.blade.php` | The `<link>`/`<script>` tags every layout includes |
+
+The `resources/css` and `resources/js` files are the readable sources. Edits to them do not apply by themselves: either edit the compiled files under `public/` directly (plain CSS/JS), or re-add the Tailwind/Vite toolchain that was retired to `storage/app/retired-frontend-toolchain/` and rebuild.
 
 ## Installation
 
 ```bash
 composer install
-npm install
 cp .env.example .env
 php artisan key:generate
 ```
@@ -71,21 +82,14 @@ php artisan vmn:create-admin owner@example.com --generate
 php artisan dev
 ```
 
-`php artisan dev` runs the web server, the queue listener (needed for enquiry emails), log tailing and Vite together. To run pieces separately:
+`php artisan dev` runs the web server, the queue listener (needed for enquiry emails) and log tailing together. To run pieces separately:
 
 ```bash
 php artisan serve
 php artisan queue:listen --tries=1
-npm run dev
 ```
 
 Locally `MAIL_MAILER=log` writes every email to `storage/logs/laravel.log`.
-
-## Build
-
-```bash
-npm run build
-```
 
 ## Testing
 
@@ -138,8 +142,6 @@ Set `GA4_MEASUREMENT_ID` to enable Google Analytics 4. Events: `package_view`, `
 
    ```bash
    composer install --no-dev --optimize-autoloader
-   npm ci
-   npm run build
    php artisan migrate --force
    php artisan db:seed --force
    php artisan storage:link
@@ -174,3 +176,6 @@ app/Mail                      AdminEnquiryMail, CustomerAcknowledgementMail
 resources/views/components    Blade components (layouts, header, footer, package card, comparison table, enquiry form, …)
 routes/web.php, routes/admin.php
 ```
+
+ php artisan serve
+  $env:Path = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\PHP.PHP.8.4_Microsoft.Winget.Source_8wekyb3d8bbwe;$env:Path"

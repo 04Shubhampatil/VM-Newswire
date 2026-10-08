@@ -9,31 +9,25 @@
             <div class="flex max-w-[820px] flex-col gap-6">
                 <x-breadcrumb :items="[['label' => 'Home', 'url' => route('home')], ['label' => 'Contact']]" />
                 <p class="eyebrow">Contact</p>
-                <h1 class="display text-[36px] leading-[1.1] tracking-[-0.02em] md:text-[48px] lg:text-[60px]">Talk to our <em class="text-accent italic">distribution team.</em></h1>
+                <h1 class="display text-[36px] leading-[1.1] tracking-[-0.02em] md:text-[48px] lg:text-[60px]">Talk to our <em class="text-accent">distribution team.</em></h1>
                 <p class="max-w-[620px] text-base leading-relaxed text-muted md:text-lg">Send an enquiry for any package, or ask us to recommend one. No payment is required — our team will contact you shortly.</p>
             </div>
-            <ul class="grid gap-4 md:grid-cols-3">
-                <li>
-                    <a href="mailto:{{ $email }}" class="card-lift flex items-center gap-4 rounded-card border border-line bg-white p-6">
-                        <span class="flex size-12 shrink-0 items-center justify-center rounded-[6px] bg-accent-soft text-accent-ink"><x-icon name="mail" :size="20" /></span>
-                        <span class="flex min-w-0 flex-col gap-1"><span class="label-caps">Email</span><span class="truncate text-base font-semibold">{{ $email }}</span></span>
-                    </a>
-                </li>
+            <dl class="grid gap-6 border-t border-line pt-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="flex flex-col gap-1.5">
+                    <dt class="label-caps">Email</dt>
+                    <dd><a href="mailto:{{ $email }}" class="link-underline text-[17px] font-semibold text-ink">{{ $email }}</a></dd>
+                </div>
                 @if ($phone || $whatsapp)
-                    <li>
-                        <a href="{{ $whatsapp ? 'https://wa.me/'.preg_replace('/[^0-9]/', '', $whatsapp) : 'tel:'.preg_replace('/[^0-9+]/', '', $phone) }}" @if ($whatsapp) target="_blank" rel="noopener" @endif class="card-lift flex items-center gap-4 rounded-card border border-line bg-white p-6">
-                            <span class="flex size-12 shrink-0 items-center justify-center rounded-[6px] bg-accent-soft text-accent-ink"><x-icon name="phone" :size="20" /></span>
-                            <span class="flex flex-col gap-1"><span class="label-caps">{{ $whatsapp ? 'Phone / WhatsApp' : 'Phone' }}</span><span class="text-base font-semibold">{{ $whatsapp ?: $phone }}</span></span>
-                        </a>
-                    </li>
+                    <div class="flex flex-col gap-1.5">
+                        <dt class="label-caps">{{ $whatsapp ? 'Phone / WhatsApp' : 'Phone' }}</dt>
+                        <dd><a href="{{ $whatsapp ? 'https://wa.me/'.preg_replace('/[^0-9]/', '', $whatsapp) : 'tel:'.preg_replace('/[^0-9+]/', '', $phone) }}" @if ($whatsapp) target="_blank" rel="noopener" @endif class="link-underline text-[17px] font-semibold text-ink">{{ $whatsapp ?: $phone }}</a></dd>
+                    </div>
                 @endif
-                <li>
-                    <a href="{{ route('packages.index') }}" class="card-lift flex items-center gap-4 rounded-card border border-line bg-white p-6">
-                        <span class="flex size-12 shrink-0 items-center justify-center rounded-[6px] bg-accent-soft text-accent-ink"><x-icon name="globe" :size="20" /></span>
-                        <span class="flex flex-col gap-1"><span class="label-caps">Packages</span><span class="text-base font-semibold">Compare all packages</span></span>
-                    </a>
-                </li>
-            </ul>
+                <div class="flex flex-col gap-1.5">
+                    <dt class="label-caps">Response</dt>
+                    <dd class="text-[17px] font-semibold text-ink">A named contact replies to every enquiry</dd>
+                </div>
+            </dl>
         </div>
     </section>
 

@@ -12,9 +12,11 @@ use Illuminate\View\View;
 
 class FaqController extends Controller
 {
-    public function index(): RedirectResponse
+    public function index(): View
     {
-        return redirect()->to(route('admin.content.edit').'#faqs');
+        return view('admin.faqs.index', [
+            'faqs' => Faq::with('package:id,name')->ordered()->get(),
+        ]);
     }
 
     public function create(): View
@@ -29,7 +31,7 @@ class FaqController extends Controller
     {
         Faq::create($this->validated($request));
 
-        return redirect()->to(route('admin.content.edit').'#faqs')->with('toast', 'FAQ added.');
+        return redirect()->to(route('admin.faqs.index'))->with('toast', 'FAQ added.');
     }
 
     public function edit(Faq $faq): View
@@ -41,14 +43,14 @@ class FaqController extends Controller
     {
         $faq->update($this->validated($request));
 
-        return redirect()->to(route('admin.content.edit').'#faqs')->with('toast', 'FAQ updated.');
+        return redirect()->to(route('admin.faqs.index'))->with('toast', 'FAQ updated.');
     }
 
     public function destroy(Faq $faq): RedirectResponse
     {
         $faq->delete();
 
-        return redirect()->to(route('admin.content.edit').'#faqs')->with('toast', 'FAQ deleted.');
+        return redirect()->to(route('admin.faqs.index'))->with('toast', 'FAQ deleted.');
     }
 
     /**

@@ -33,6 +33,7 @@ class EnquiryController extends Controller
             'filters' => $filters,
             'sort' => $sort,
             'direction' => $direction,
+            'statusCounts' => Enquiry::query()->select('status')->selectRaw('count(*) as total')->groupBy('status')->pluck('total', 'status'),
             'packages' => Package::withTrashed()->ordered()->get(['id', 'name']),
         ]);
     }

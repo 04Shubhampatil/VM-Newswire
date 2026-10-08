@@ -101,8 +101,7 @@ class EnquiryTest extends TestCase
             ->assertOk()
             ->assertSee('$dispatch(\'open-enquiry\')', false)
             ->assertSee('id="enquiry-modal-title"', false)
-            ->assertSee('id="menq-name"', false)
-            ->assertSee('id="enq-name"', false);
+            ->assertSee('id="menq-name"', false);
     }
 
     public function test_in_page_submission_returns_field_errors_as_json(): void

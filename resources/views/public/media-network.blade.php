@@ -1,79 +1,150 @@
 <x-layouts.public title="Media Network" description="See the newswires, publications and categories where VM Newswire press releases can appear.">
-    <section class="pt-9 pb-14 md:pt-16 md:pb-20 lg:pt-[72px] lg:pb-24">
-        <div class="container-site flex flex-col gap-14 xl:grid xl:grid-cols-[minmax(0,1fr)_660px] xl:items-center xl:gap-20">
-            <div class="flex flex-col gap-6">
-                <x-breadcrumb :items="[['label' => 'Home', 'url' => route('home')], ['label' => 'Media Network']]" />
-                <p class="eyebrow">Media network</p>
-                <h1 class="display text-[36px] leading-[1.1] tracking-[-0.02em] md:text-[48px] lg:text-[60px]">Where your press release <em class="text-accent italic">can appear.</em></h1>
-                <p class="text-base leading-relaxed text-muted md:text-lg">VM Newswire packages combine recognised newswires and headline publications with an extended network of {{ $site->get('network_size_label') }} digital outlets across business, finance, news, technology, markets and digital media.</p>
-                <dl class="mt-2 grid grid-cols-3 border-t border-line">
-                    @foreach ([[$site->get('network_size_label'), 'media outlets'], [$summary->count(), 'publication categories'], [number_format($totalOutlets), 'outlets listed']] as [$value, $label])
-                        <div class="flex flex-col-reverse gap-1 pt-5 pr-2 md:pr-5 [&+div]:border-l [&+div]:border-line [&+div]:pl-3 md:[&+div]:pl-5">
-                            <dt class="text-[13px] text-muted">{{ $label }}</dt>
-                            <dd class="font-display text-4xl leading-none font-semibold md:text-[38px]">{{ $value }}</dd>
+    @php
+        // Hero photo: uploaded in Admin → Website Content, or the default newsroom photo that ships with the site.
+        $photo = $site->get('media_network_image')
+            ? Storage::disk(config('vmnewswire.posters.disk'))->url($site->get('media_network_image'))
+            : asset('images/media-network-hero.webp');
+        $categories = collect(['All' => null])->merge($summary->pluck('category')->mapWithKeys(fn ($c) => [$c => $c]));
+        $activeFilters = array_filter($filters);
+    @endphp
+
+    {{-- Hero: copy and stats on the left (5/12), the newsroom photo on the right (7/12) --}}
+    <section class="relative overflow-hidden bg-white pt-10 pb-14 lg:pt-14 lg:pb-20" aria-labelledby="network-heading">
+        <span class="hero-glow" aria-hidden="true"></span>
+        <div class="container-site relative">
+            <x-breadcrumb :items="[['label' => 'Home', 'url' => route('home')], ['label' => 'Media Network']]" class="sr-only" />
+            <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-12">
+                <div class="flex flex-col items-start lg:col-span-5">
+                    <p class="hero-in flex items-center gap-3 text-[12px] font-semibold tracking-[0.14em] text-heading uppercase" style="--i: 0">
+                        <span class="accent-bar w-8"></span>{{ $site->get('media_network_eyebrow') }}
+                    </p>
+                    <h1 id="network-heading" class="hero-in mt-5 text-[40px] leading-[1.08] font-bold tracking-[-0.025em] text-heading sm:text-[50px] lg:text-[54px] [&_em]:text-accent-ink [&_em]:not-italic" style="--i: 1">
+                        {!! App\Support\Heading::render($site->get('media_network_heading')) !!}
+                    </h1>
+                    <p class="hero-in mt-5 max-w-[520px] text-[16px] leading-[1.7] text-muted sm:text-[17px]" style="--i: 2">
+                        {{ str_replace(['{company}', '{network}'], [$site->get('company_name'), $site->get('network_size_label')], (string) $site->get('media_network_text')) }}
+                    </p>
+
+                    <dl class="hero-in mt-8 grid w-full max-w-[520px] grid-cols-3 divide-x divide-line rounded-2xl border border-line bg-white px-2 py-5 shadow-[var(--shadow-card)] sm:px-4" style="--i: 3">
+                        <div class="flex flex-col-reverse px-3 sm:px-4">
+                            <dt class="mt-1 text-[12px] leading-snug font-medium text-muted">media outlets</dt>
+                            <dd class="text-[26px] leading-none font-bold tracking-[-0.02em] text-heading sm:text-[30px]">{{ $site->get('network_size_label') }}</dd>
                         </div>
-                    @endforeach
-                </dl>
+                        <div class="flex flex-col-reverse px-3 sm:px-4">
+                            <dt class="mt-1 text-[12px] leading-snug font-medium text-muted">publication categories</dt>
+                            <dd class="text-[26px] leading-none font-bold tracking-[-0.02em] text-accent-ink sm:text-[30px]">{{ $summary->count() }}</dd>
+                        </div>
+                        <div class="flex flex-col-reverse px-3 sm:px-4">
+                            <dt class="mt-1 text-[12px] leading-snug font-medium text-muted">outlets listed</dt>
+                            <dd class="text-[26px] leading-none font-bold tracking-[-0.02em] text-heading sm:text-[30px]">{{ number_format($totalOutlets) }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <figure class="lg:col-span-7">
+                    <img src="{{ $photo }}" alt="{{ $site->get('company_name') }} newsroom monitoring distribution across media dashboards" width="960" height="715" fetchpriority="high" decoding="async"
+                         class="aspect-[4/3] w-full rounded-2xl object-cover shadow-[var(--shadow-float)]">
+                </figure>
             </div>
-            <x-network-map :summary="$summary" />
         </div>
     </section>
 
-    <section id="directory" class="border-t border-line section-y">
-        <div class="container-site flex flex-col gap-8">
-            <x-section-heading eyebrow="Outlet directory" description="Filter by category to see which outlets appear in which packages.">Featured publications</x-section-heading>
-
-            <form method="GET" action="{{ route('media-network') }}#directory" class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div role="group" aria-label="Filter by category" class="-mx-5 flex gap-2 overflow-x-auto px-5 md:mx-0 md:flex-wrap md:px-0">
-                    @foreach (collect(['All' => null])->merge($summary->pluck('category')->mapWithKeys(fn ($c) => [$c => $c])) as $label => $value)
-                        @php $active = ($filters['category'] ?? null) === $value; @endphp
-                        <a href="{{ route('media-network', array_filter(['category' => $value, 'q' => $filters['q'] ?? null])) }}#directory"
-                           @if ($active) aria-current="true" @endif
-                           class="flex h-11 shrink-0 items-center rounded-[6px] border px-[18px] text-sm font-semibold transition {{ $active ? 'border-ink bg-ink text-white' : 'border-line bg-white hover:border-ink' }}">{{ $label }}</a>
-                    @endforeach
+    {{-- Outlet directory --}}
+    <section id="directory" class="scroll-mt-24 bg-[#f5f9fc] py-16 lg:py-24">
+        <div class="container-site">
+            <div class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end" data-reveal-group>
+                <div data-reveal>
+                    <p class="flex items-center gap-3 text-[12px] font-semibold tracking-[0.14em] text-accent-ink uppercase">
+                        <span class="accent-bar w-8"></span>{{ $site->get('directory_eyebrow') }}
+                    </p>
+                    <h2 class="home-h2 mt-4 [&_em]:text-accent-ink [&_em]:not-italic">{!! App\Support\Heading::render($site->get('directory_heading')) !!}</h2>
+                    @if ($site->get('directory_text'))
+                        <p class="mt-2 text-[16px] text-muted">{{ $site->get('directory_text') }}</p>
+                    @endif
                 </div>
-                <label class="flex h-11 items-center gap-2.5 rounded-[6px] border border-line bg-white px-3.5 text-muted focus-within:border-accent lg:w-72">
-                    <x-icon name="search" :size="17" />
-                    <span class="sr-only">Search outlets</span>
+                <form method="GET" action="{{ route('media-network') }}#directory" class="relative w-full lg:w-80" role="search" data-reveal>
                     @if (! empty($filters['category']))<input type="hidden" name="category" value="{{ $filters['category'] }}">@endif
-                    <input type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search outlets" class="h-10 grow bg-transparent text-[15px] text-ink outline-none">
-                </label>
-            </form>
+                    <label for="outlet-search" class="sr-only">Search media outlets</label>
+                    <x-icon name="search" :size="18" class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-muted-soft" />
+                    <input id="outlet-search" type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search media outlets..."
+                           class="h-12 w-full rounded-xl border border-line bg-white pr-4 pl-11 text-[15px] text-ink shadow-[var(--shadow-card)] transition placeholder:text-muted-soft hover:border-[#b9c7d4] focus:border-teal focus:ring-4 focus:ring-teal/15 focus:outline-none">
+                </form>
+            </div>
+
+            <div class="mt-8 flex items-center gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label="Filter by category">
+                @foreach ($categories as $label => $value)
+                    @php $active = ($filters['category'] ?? null) === $value; @endphp
+                    <a href="{{ route('media-network', array_filter(['category' => $value, 'q' => $filters['q'] ?? null])) }}#directory" @if ($active) aria-current="true" @endif
+                       class="flex h-9 shrink-0 items-center rounded-full border px-4 text-[13px] font-semibold whitespace-nowrap transition {{ $active ? 'border-navy-900 bg-navy-900 text-white' : 'border-line bg-white text-heading hover:border-teal hover:text-accent-ink' }}">{{ $label }}</a>
+                @endforeach
+            </div>
 
             @if ($outlets->isEmpty())
-                <p class="rounded-card border border-line bg-white p-8 text-muted">No outlets match your filters.</p>
+                <div class="mt-8 flex flex-col items-center justify-center rounded-2xl border border-line bg-white px-6 py-14 text-center shadow-[var(--shadow-card)]">
+                    <span class="flex size-12 items-center justify-center rounded-full bg-teal-soft text-accent-ink"><x-icon name="search" :size="22" :stroke="1.8" /></span>
+                    <h3 class="mt-4 text-[18px] font-semibold text-heading">No media outlets match your search</h3>
+                    <p class="mt-1 max-w-sm text-[14px] text-muted">Try another term or clear the filters.</p>
+                    <a href="{{ route('media-network') }}#directory" class="btn-pill mt-6 h-11 bg-navy-900 text-[14px] text-white hover:bg-brand">
+                        Reset filters
+                        <span class="btn-pill-icon size-7 bg-white text-heading"><x-icon name="arrow-right" :size="14" :stroke="2.4" /></span>
+                    </a>
+                </div>
             @else
-                <ul class="grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-reveal-group>
+                <ul class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group>
                     @foreach ($outlets as $outlet)
-                        <li data-reveal class="card-lift flex min-h-[150px] flex-col justify-between gap-4 rounded-card border border-line bg-white p-6">
-                            <div class="flex items-start justify-between gap-3">
-                                <span class="font-display text-[28px] leading-[1.12] font-semibold">{{ $outlet->name }}</span>
-                                <span class="shrink-0 text-[11px] font-bold tracking-[0.12em] text-accent-ink uppercase">{{ $outlet->category }}</span>
-                            </div>
-                            <div class="flex flex-col gap-1 border-t border-line-soft pt-3">
-                                <span class="label-caps">Included in</span>
-                                @if ($outlet->packages->isNotEmpty())
-                                    <span class="text-sm font-semibold">
-                                        @foreach ($outlet->packages as $package)
-                                            <a href="{{ route('packages.show', $package->slug) }}" class="hover:text-accent-ink hover:underline">{{ $package->name }}</a>@if (! $loop->last)<span class="text-muted"> · </span>@endif
-                                        @endforeach
-                                    </span>
-                                @else
-                                    <span class="text-sm text-muted">Available on request</span>
+                        <li data-reveal>
+                            <article class="flex h-full flex-col rounded-2xl border border-line bg-white p-6 shadow-[var(--shadow-card)] transition duration-200 hover:-translate-y-0.5 hover:border-[#b9c7d4] hover:shadow-[var(--shadow-float)]">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex min-w-0 items-center gap-3">
+                                        @if ($outlet->logo_src)
+                                            <img src="{{ $outlet->logo_src }}" alt="" loading="lazy" class="h-8 w-auto max-w-[96px] shrink-0 object-contain">
+                                        @endif
+                                        <h3 class="text-[18px] leading-snug font-semibold text-heading">{{ $outlet->name }}</h3>
+                                    </div>
+                                    <span class="shrink-0 rounded-full bg-[#ddf7f2] px-2.5 py-1 text-[10px] font-bold tracking-[0.08em] text-[#0c7c6e] uppercase">{{ $outlet->category }}</span>
+                                </div>
+                                @if ($outlet->short_description)
+                                    <p class="mt-3 text-[14px] leading-relaxed text-muted">{{ $outlet->short_description }}</p>
                                 @endif
-                            </div>
+                                <div class="mt-auto border-t border-line-soft pt-4 {{ $outlet->short_description ? 'mt-5' : 'mt-6' }}">
+                                    <p class="text-[11px] font-semibold tracking-[0.12em] text-muted-soft uppercase">Included in</p>
+                                    @if ($outlet->packages->isNotEmpty())
+                                        <p class="mt-1.5 text-[13px] font-medium leading-relaxed text-heading">
+                                            @foreach ($outlet->packages as $package)
+                                                <a href="{{ route('packages.show', $package->slug) }}" class="transition hover:text-accent-ink hover:underline">{{ $package->name }}</a>@if (! $loop->last)<span class="text-muted-soft"> &bull; </span>@endif
+                                            @endforeach
+                                        </p>
+                                    @else
+                                        <p class="mt-1.5 text-[13px] font-medium text-muted">Available on request</p>
+                                    @endif
+                                </div>
+                            </article>
                         </li>
                     @endforeach
                 </ul>
                 <x-pagination :paginator="$outlets" />
             @endif
+        </div>
+    </section>
 
-            <div class="flex flex-col gap-4 rounded-card bg-accent-soft p-6 md:flex-row md:items-center md:justify-between md:gap-8 md:px-8">
-                <p class="max-w-[720px] text-base leading-relaxed"><strong>The network varies by package.</strong> The complete outlet list for each package is included in its sample report.</p>
-                <x-button :href="route('packages.index')" size="sm" class="h-12! max-md:w-full">View Packages</x-button>
+    {{-- Network notice --}}
+    <section class="bg-white pt-16 pb-6 lg:pt-20">
+        <div class="container-site">
+            <div class="flex flex-col items-center justify-between gap-6 rounded-2xl border border-teal/30 bg-[#e3f7f4] p-6 sm:p-8 md:flex-row">
+                <div class="flex items-center gap-4">
+                    <span class="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-accent-ink shadow-[var(--shadow-card)]" aria-hidden="true"><x-icon name="info" :size="20" :stroke="1.8" /></span>
+                    <p class="text-[15px] leading-relaxed font-medium text-heading sm:text-[16px]">The network varies by package. The complete outlet list for each package is included in its sample report.</p>
+                </div>
+                <a href="{{ route('packages.index') }}" class="btn-pill w-full bg-navy-900 text-white hover:bg-brand max-sm:justify-between md:w-auto" data-track="cta_click" data-track-label="Media network: View Packages">
+                    View Packages
+                    <span class="btn-pill-icon bg-white text-heading"><x-icon name="arrow-right" :size="15" :stroke="2.4" /></span>
+                </a>
             </div>
         </div>
     </section>
 
-    <x-cta-band />
+    <x-home.final-cta heading="Ready to reach the right audience?"
+                      text="Choose a VM Newswire distribution package and get your story in front of the publications that matter."
+                      label="View Packages" :href="route('packages.index')"
+                      secondary-label="Send an Enquiry" :secondary-href="route('contact').'#enquire'" />
 </x-layouts.public>

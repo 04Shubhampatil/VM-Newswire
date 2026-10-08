@@ -4,6 +4,7 @@
     'locked' => false,       // true on a package page: the package is required
     'source' => null,        // path the enquiry came from
     'prefix' => 'enq',       // id prefix, so two forms on one page don't share ids
+    'compact' => false,      // Stitch home card: single column, dark 40px fields, no company field
 ])
 @php
     $selectedId = old('package_id', $selected?->id);
@@ -13,18 +14,18 @@
         .":class=\"err('{$name}') && 'border-danger'\" :aria-invalid=\"err('{$name}') ? 'true' : null\""
         .($errors->has($name) ? ' aria-invalid="true"' : '');
 @endphp
-<div x-data="enquiryForm(@js($selected?->name ?? ''), @js((object) $errors->getMessages()))" {{ $attributes }}>
+<div x-data="enquiryForm(@js($selected?->name ?? ''), @js((object) $errors->getMessages()))" {{ $attributes->class(['form-compact' => $compact]) }}>
     <form method="POST" action="{{ route('enquiries.store') }}" novalidate x-show="!sent"
           @focusin.once="start()" @submit="submit($event)"
-          class="grid grid-cols-1 gap-5 md:grid-cols-2">
+          class="{{ $compact ? 'space-y-4' : 'grid grid-cols-1 gap-5 md:grid-cols-2' }}">
         @csrf
         <input type="hidden" name="context" value="{{ $locked ? 'package' : 'general' }}">
         <input type="hidden" name="source_page" value="{{ $source ?? request()->getPathInfo() }}">
 
         {{-- Honeypot: hidden from people, tempting for bots. --}}
         <div class="absolute -left-[9999px]" aria-hidden="true">
-            <label for="website">Leave this field empty</label>
-            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+            <label for="{{ $prefix }}-website">Leave this field empty</label>
+            <input type="text" id="{{ $prefix }}-website" name="website" tabindex="-1" autocomplete="off">
         </div>
 
         <div role="alert" x-show="general" x-text="general" x-cloak
@@ -35,7 +36,11 @@
             </div>
         @endif
 
-        @foreach ([
+        @foreach ($compact ? [
+            ['name', 'Full Name', 'text', 'name', 'Jane Doe', 120, true],
+            ['email', 'Work Email', 'email', 'email', 'jane@company.com', 190, true],
+            ['phone', 'Phone / WhatsApp', 'tel', 'tel', '+1 555 000 0000', 40, true],
+        ] : [
             ['name', 'Name', 'text', 'name', 'Your full name', 120, true],
             ['email', 'Business Email', 'email', 'email', 'you@company.com', 190, true],
             ['phone', 'Phone / WhatsApp', 'tel', 'tel', '+1 555 000 0000', 40, true],
@@ -51,7 +56,7 @@
         @endforeach
 
         <div class="md:col-span-2">
-            <label for="{{ $prefix }}-package" class="field-label">Package</label>
+            <label for="{{ $prefix }}-package" class="field-label">{{ $compact ? 'Distribution Target / Preferred Package' : 'Package' }}</label>
             <select id="{{ $prefix }}-package" name="package_id" @if ($locked) required @endif aria-describedby="{{ $prefix }}-package_id-error" {!! $inputAttrs('package_id') !!}>
                 @unless ($locked)<option value="">Not sure — recommend one</option>@endunless
                 @foreach ($packages as $package)
@@ -64,9 +69,9 @@
         </div>
 
         <div class="md:col-span-2">
-            <label for="{{ $prefix }}-message" class="field-label">Message</label>
-            <textarea id="{{ $prefix }}-message" name="message" rows="5" required maxlength="{{ config('vmnewswire.enquiries.message_max') }}"
-                      placeholder="Tell us about your announcement — topic, timing and target audience."
+            <label for="{{ $prefix }}-message" class="field-label">{{ $compact ? 'Brief Announcement Summary' : 'Message' }}</label>
+            <textarea id="{{ $prefix }}-message" name="message" rows="{{ $compact ? 3 : 5 }}" required maxlength="{{ config('vmnewswire.enquiries.message_max') }}"
+                      placeholder="{{ $compact ? 'Provide a draft link or an outline of your press release…' : 'Tell us about your announcement — topic, timing and target audience.' }}"
                       aria-describedby="{{ $prefix }}-message-error" {!! $inputAttrs('message') !!}>{{ old('message') }}</textarea>
             <p id="{{ $prefix }}-message-error" class="field-error" x-show="err('message')" x-text="err('message')" @unless ($errors->has('message')) x-cloak @endunless>{{ $errors->first('message') }}</p>
         </div>
@@ -78,9 +83,11 @@
             </div>
         @endif
 
-        <div class="flex flex-col-reverse gap-4 pt-2 md:col-span-2 md:flex-row md:items-center md:justify-between">
-            <p class="flex items-center gap-2.5 text-sm text-muted"><x-icon name="lock" :size="16" class="text-success" />No payment required. Our team will contact you shortly.</p>
-            <button type="submit" class="btn btn-primary min-w-[196px]" :disabled="submitting" :aria-busy="submitting.toString()">
+        <div class="{{ $compact ? '' : 'flex flex-col-reverse gap-4 pt-2 md:col-span-2 md:flex-row md:items-center md:justify-between' }}">
+            @unless ($compact)
+                <p class="flex items-center gap-2.5 text-sm text-muted"><x-icon name="lock" :size="16" class="text-success" />No payment required. Our team will contact you shortly.</p>
+            @endunless
+            <button type="submit" class="{{ $compact ? 'flex w-full items-center justify-center gap-1.5 rounded-md bg-accent-fill px-4 py-3 text-xs font-semibold text-white shadow-lg shadow-blue-700/30 transition hover:bg-blue-600 disabled:opacity-60' : 'btn btn-primary min-w-[196px]' }}" :disabled="submitting" :aria-busy="submitting.toString()">
                 <span x-text="submitting ? 'Sending…' : 'Submit Enquiry'">Submit Enquiry</span>
                 <svg x-show="submitting" x-cloak class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".3" stroke-width="2.5"/><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
                 <x-icon name="arrow-right" :size="17" x-show="!submitting" />

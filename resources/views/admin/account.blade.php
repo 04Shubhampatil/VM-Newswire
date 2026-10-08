@@ -1,12 +1,14 @@
-<x-layouts.admin title="Change password" breadcrumb="Admin / Account">
+<x-layouts.admin title="My account" :description="'Signed in as '.$user->email" :breadcrumbs="[['My account', null]]">
     @if ($user->must_change_password)
-        <p role="alert" class="max-w-xl rounded-[8px] border border-[#e8d9a8] bg-[#fff8e1] px-5 py-4 text-sm text-[#6b5200]">You signed in with a one-time password. Set your own password to continue.</p>
+        <x-admin.alert type="warning" class="max-w-xl" title="Set your own password.">You signed in with a one-time password.</x-admin.alert>
     @endif
-    <form method="POST" action="{{ route('admin.account.password.update') }}" class="admin-panel flex max-w-xl flex-col gap-5">
+    <form method="POST" action="{{ route('admin.account.password.update') }}" class="flex max-w-xl flex-col gap-6">
         @csrf @method('PUT')
-        <x-admin.input name="current_password" label="Current password" type="password" autocomplete="current-password" required />
-        <x-admin.input name="password" label="New password" type="password" autocomplete="new-password" required help="At least 8 characters, with letters and numbers." />
-        <x-admin.input name="password_confirmation" label="Confirm new password" type="password" autocomplete="new-password" required />
-        <button type="submit" class="btn btn-primary btn-sm self-start">Update password</button>
+        <x-admin.panel title="Change password">
+            <x-admin.input name="current_password" label="Current password" type="password" autocomplete="current-password" required />
+            <x-admin.input name="password" label="New password" type="password" autocomplete="new-password" required help="At least 8 characters, with letters and numbers." />
+            <x-admin.input name="password_confirmation" label="Confirm new password" type="password" autocomplete="new-password" required />
+        </x-admin.panel>
+        <button type="submit" class="btn btn-primary btn-sm self-start"><x-icon name="check" :size="15" />Update password</button>
     </form>
 </x-layouts.admin>

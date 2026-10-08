@@ -4,6 +4,6 @@
     @if ($outlet->logo_src)
         <img src="{{ $outlet->logo_src }}" alt="{{ $outlet->name }}" loading="lazy" class="max-h-10 max-w-[70%] object-contain grayscale" />
     @else
-        <span class="font-display text-[22px] font-semibold text-ink md:text-[28px]">{{ $outlet->name }}</span>
+        <span class="font-sans text-[22px] font-semibold text-ink md:text-[28px]">{{ $outlet->name }}</span>
     @endif
 </div>

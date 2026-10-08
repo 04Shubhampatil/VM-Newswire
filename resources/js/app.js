@@ -153,6 +153,52 @@ Alpine.data('posterPicker', (current = null) => ({
     },
 }));
 
+/**
+ * Home: package pricing slider. The track is a native snap-scrolling flex row; this only drives the prev/next
+ * buttons, keeps them in sync with the scroll position, and resets the frame when the brand filter changes.
+ */
+Alpine.data('packageSlider', () => ({
+    brand: 'All',
+    canPrev: false,
+    canNext: false,
+
+    init() {
+        this.$nextTick(() => this.update());
+        window.addEventListener('resize', () => this.update(), { passive: true });
+    },
+
+    setBrand(value) {
+        this.brand = value;
+        // x-show toggles display on the next animation frame, so wait two frames for the new layout
+        // before resetting the frame (this also beats Chrome's re-snap to the previously snapped slide).
+        this.$nextTick(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+            this.$refs.track.scrollTo({ left: 0, behavior: 'auto' });
+            this.update();
+        })));
+    },
+
+    /** Width of one visible slide plus the track gap; falls back to the frame width. */
+    step() {
+        const track = this.$refs.track;
+        const slide = Array.from(track.querySelectorAll('[data-slide]')).find((el) => el.offsetParent !== null);
+        if (!slide) return track.clientWidth;
+        const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+        return slide.getBoundingClientRect().width + gap;
+    },
+
+    go(direction) {
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        this.$refs.track.scrollBy({ left: direction * this.step(), behavior: reduce ? 'auto' : 'smooth' });
+    },
+
+    update() {
+        const track = this.$refs.track;
+        if (!track) return;
+        this.canPrev = track.scrollLeft > 4;
+        this.canNext = track.scrollLeft + track.clientWidth < track.scrollWidth - 4;
+    },
+}));
+
 window.Alpine = Alpine;
 Alpine.start();
 initMotion();

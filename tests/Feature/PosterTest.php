@@ -114,7 +114,7 @@ class PosterTest extends TestCase
         $this->assertFalse($outlet->fresh()->is_active);
     }
 
-    public function test_hero_renders_database_posters_with_a_fallback_when_missing(): void
+    public function test_home_news_cards_list_highlighted_outlets_and_open_their_details(): void
     {
         Storage::fake('public');
         $admin = $this->admin();
@@ -123,16 +123,17 @@ class PosterTest extends TestCase
         MediaOutlet::factory()->create(['name' => 'Hidden Outlet', 'is_highlighted' => false]);
         auth()->logout();
 
-        $withPoster = MediaOutlet::where('name', 'AP News')->sole();
+        // The outlet details dialog still carries the uploaded poster (JSON-encoded in the Alpine data).
+        $posterPath = MediaOutlet::where('name', 'AP News')->sole()->poster_path;
 
         $this->get('/')
             ->assertOk()
-            ->assertSee($withPoster->poster_src, false)
             ->assertSee('Fallback Outlet')
-            ->assertSee('poster-fallback', false)
+            ->assertSee(basename($posterPath), false)
             ->assertSee("open-outlet', 'ap-news'", false)
             ->assertSee("open-outlet', 'fallback-outlet'", false)
-            ->assertDontSee("open-outlet', 'hidden-outlet'", false);
+            ->assertDontSee("open-outlet', 'hidden-outlet'", false)
+            ->assertDontSee('Hidden Outlet');
     }
 
     public function test_old_admin_media_network_url_redirects(): void

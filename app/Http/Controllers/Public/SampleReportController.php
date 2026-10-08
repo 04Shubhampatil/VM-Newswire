@@ -14,7 +14,7 @@ class SampleReportController extends Controller
     public function index(): View
     {
         return view('public.sample-reports', [
-            'packages' => Package::active()->ordered()->with('currentReport')->get(),
+            'packages' => Package::active()->ordered()->with(['currentReport', 'featuredMedia'])->get(),
         ]);
     }
 

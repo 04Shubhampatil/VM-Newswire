@@ -41,7 +41,8 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // Relative so uploaded posters and logos resolve on whatever host/port serves the site.
+            'url' => '/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

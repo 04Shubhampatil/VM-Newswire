@@ -46,7 +46,7 @@
                 </dl>
             </div>
 
-            <aside x-data aria-label="Price" class="flex flex-col gap-[22px] rounded-card border border-accent bg-white p-6 shadow-[0_24px_48px_-36px_rgba(27,27,47,0.45)] md:p-8 lg:sticky lg:top-28 lg:mt-14">
+            <aside x-data aria-label="Price" class="card-elevated flex flex-col gap-[22px] p-6 md:p-8 lg:sticky lg:top-28 lg:mt-14">
                 <div class="flex items-center justify-between gap-3">
                     <span class="label-caps">Price per press release</span>
                     @if ($package->is_highlighted)<span class="badge bg-accent-soft text-accent-ink">Most requested</span>@endif
@@ -82,9 +82,9 @@
                 @if ($features)
                     <ol data-reveal-group class="grid gap-x-8 gap-y-6 sm:grid-cols-2 {{ $package->full_content ? '' : 'md:col-span-2 lg:grid-cols-3' }}">
                         @foreach ($features as $feature)
-                            <li data-reveal class="flex flex-col gap-2 border-t border-ink pt-5">
+                            <li data-reveal class="flex flex-col gap-2 border-t border-navy-900 pt-5">
                                 <span class="font-mono text-xs text-accent-ink">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                                <span class="font-display text-[24px] leading-tight font-semibold">{{ $feature }}</span>
+                                <span class="text-[24px] leading-tight font-normal text-ink">{{ $feature }}</span>
                             </li>
                         @endforeach
                     </ol>
@@ -104,7 +104,7 @@
                     @endforeach
                     @if ($package->network_media_count)
                         <li class="flex h-24 flex-col items-center justify-center gap-0.5 border-r border-b border-line bg-brand text-canvas md:h-32">
-                            <span class="font-display text-[34px] leading-none font-semibold md:text-[36px]">{{ $site->get('network_size_label') }}</span>
+                            <span class="font-sans text-[34px] leading-none font-semibold md:text-[36px]">{{ $site->get('network_size_label') }}</span>
                             <span class="text-xs text-muted-on-brand">network outlets</span>
                         </li>
                     @endif

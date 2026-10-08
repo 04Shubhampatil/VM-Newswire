@@ -39,17 +39,15 @@
     <meta name="twitter:description" content="{{ $metaDescription }}">
     <meta name="twitter:image" content="{{ $ogImageUrl }}">
 
-    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
-    <link rel="alternate icon" href="{{ asset('favicon.ico') }}" sizes="16x16 32x32 48x48">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="16x16 32x32 48x48">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
-    <meta name="theme-color" content="#7C3AED">
+    <meta name="theme-color" content="#0b1628">
 
     @if ($event)
         <meta name="vmn-event" content="{{ json_encode($event) }}">
     @endif
 
-    @fonts
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('partials.head-assets')
 
     @if ($ga)
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ urlencode($ga) }}"></script>
@@ -67,9 +65,8 @@
 
     @stack('schema')
 </head>
-<body class="min-h-screen bg-canvas">
-    <div class="scroll-progress" aria-hidden="true"></div>
-    <a href="#main" class="sr-only z-50 rounded bg-ink px-4 py-2 text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3">Skip to content</a>
+<body class="site-public min-h-screen bg-canvas">
+    <a href="#main" class="sr-only z-50 rounded bg-navy-900 px-4 py-2 text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3">Skip to content</a>
 
     <x-header />
 

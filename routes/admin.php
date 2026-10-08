@@ -55,6 +55,7 @@ Route::post('/enquiries/{enquiry}/retry-emails', [EnquiryController::class, 'ret
 
 // Website content & settings
 Route::get('/content', [ContentController::class, 'edit'])->name('content.edit');
+Route::get('/content/{section}', [ContentController::class, 'edit'])->name('content.section')->whereIn('section', ContentController::SECTIONS);
 Route::put('/content', [ContentController::class, 'update'])->name('content.update');
 Route::resource('faqs', FaqController::class)->except('show');
 Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
