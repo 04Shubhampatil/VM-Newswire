@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         if (! app()->isProduction() || config('vmnewswire.seed_demo_data')) {
-            $this->call(DemoCatalogSeeder::class);
+            $this->call([DemoCatalogSeeder::class, NewsroomSeeder::class]);
         } else {
             $this->command?->warn('Production: skipped demo packages and media outlets. Add real ones in /admin.');
         }

@@ -24,7 +24,7 @@ class CatalogCache
     public static function footerPackages(): Collection
     {
         try {
-            $rows = Cache::remember('catalog.footer_packages', 3600, fn () => Package::active()->ordered()->limit(6)
+            $rows = Cache::remember('catalog.footer_packages', 3600, fn () => Package::active()->ordered()->limit(8)
                 ->get(['id', 'name', 'slug'])->map->only(['id', 'name', 'slug'])->all());
         } catch (Throwable) {
             $rows = [];

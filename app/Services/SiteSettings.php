@@ -70,6 +70,8 @@ class SiteSettings
             'social_linkedin' => '',
             'social_x' => '',
             'social_facebook' => '',
+            'social_instagram' => '',
+            'social_youtube' => '',
             'about_intro' => 'VM Newswire helps companies, agencies and founders distribute press releases across leading news platforms, business publications and digital media networks.',
             'about_body' => 'We package distribution into clear, fixed-price options — so you know which platforms your announcement reaches, what it costs, and what the report will show before you commit.',
             'about_image' => '',

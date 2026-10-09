@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Public\EnquiryController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\MediaNetworkController;
+use App\Http\Controllers\Public\NewsroomController;
 use App\Http\Controllers\Public\PackageController;
 use App\Http\Controllers\Public\PageController;
 use App\Http\Controllers\Public\SampleReportController;
@@ -15,6 +16,9 @@ Route::get('/', HomeController::class)->name('home');
 Route::get('/packages', [PackageController::class, 'index'])->name('packages.index');
 Route::get('/packages/{slug}', [PackageController::class, 'show'])->name('packages.show')->where('slug', '[a-z0-9-]+');
 Route::get('/packages/{package:slug}/network', [PackageController::class, 'network'])->name('packages.network');
+
+Route::get('/newsroom', [NewsroomController::class, 'index'])->name('newsroom.index');
+Route::get('/newsroom/{release:slug}', [NewsroomController::class, 'show'])->name('newsroom.show');
 
 Route::get('/media-network', MediaNetworkController::class)->name('media-network');
 Route::get('/sample-reports', [SampleReportController::class, 'index'])->name('sample-reports.index');

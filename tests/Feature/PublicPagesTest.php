@@ -18,6 +18,7 @@ class PublicPagesTest extends TestCase
             'home' => ['/'],
             'packages' => ['/packages'],
             'media network' => ['/media-network'],
+            'newsroom' => ['/newsroom'],
             'about' => ['/about'],
             'contact' => ['/contact'],
             'faq' => ['/faq'],

@@ -18,7 +18,8 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }} · Admin · {{ $site->get('company_name') }}</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="16x16 32x32 48x48">
+    <link rel="icon" href="{{ asset('favicon.svg') }}?v=2" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=2" sizes="16x16 32x32 48x48">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     @include('partials.head-assets')
 </head>

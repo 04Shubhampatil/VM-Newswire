@@ -28,6 +28,8 @@ class SettingsController extends Controller
             'social_linkedin' => ['nullable', 'url:https', 'max:255'],
             'social_x' => ['nullable', 'url:https', 'max:255'],
             'social_facebook' => ['nullable', 'url:https', 'max:255'],
+            'social_instagram' => ['nullable', 'url:https', 'max:255'],
+            'social_youtube' => ['nullable', 'url:https', 'max:255'],
         ]);
 
         $settings->set($data);

@@ -4,14 +4,17 @@
      * "Services & Solutions" and "Resources" open small dropdowns; every link points at a registered route.
      */
     $nav = [
-        ['label' => 'Newsroom', 'url' => route('media-network'), 'active' => 'media-network'],
-        ['label' => 'Services & Solutions', 'active' => 'packages.*', 'children' => [
-            ['Press Release Distribution', route('packages.index')],
+        ['label' => 'Newsroom', 'url' => route('newsroom.index'), 'active' => 'newsroom.*'],
+        // Packages: every active package, then the comparison page.
+        ['label' => 'Packages', 'active' => 'packages.*', 'children' => [
+            ...\App\Support\CatalogCache::footerPackages()->map(fn ($p) => [$p->name, route('packages.show', $p->slug)])->all(),
+            ['All packages', route('packages.index')],
+        ]],
+        ['label' => 'Services & Solutions', 'active' => null, 'children' => [
             ['Media Network', route('media-network')],
             ['Reporting & Analytics', route('sample-reports.index')],
         ]],
-        ['label' => 'Resources', 'active' => 'sample-reports.*', 'children' => [
-            ['Sample Reports', route('sample-reports.index')],
+        ['label' => 'Resources', 'active' => 'faq', 'children' => [
             ['FAQ', route('faq')],
             ['About VM Newswire', route('about')],
         ]],

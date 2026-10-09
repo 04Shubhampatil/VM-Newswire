@@ -92,8 +92,11 @@
             @else
                 <ul class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group>
                     @foreach ($outlets as $outlet)
+                        @php $primaryPackage = $outlet->packages->first(); @endphp
                         <li data-reveal>
-                            <article class="flex h-full flex-col rounded-2xl border border-line bg-white p-6 shadow-[var(--shadow-card)] transition duration-200 hover:-translate-y-0.5 hover:border-[#b9c7d4] hover:shadow-[var(--shadow-float)]">
+                            {{-- The whole card opens the outlet's first (primary) package page. --}}
+                            <{{ $primaryPackage ? 'a' : 'article' }} @if ($primaryPackage) href="{{ route('packages.show', $primaryPackage->slug) }}" aria-label="{{ $outlet->name }}: view the {{ $primaryPackage->name }} package" @endif
+                                class="group flex h-full flex-col rounded-2xl border border-line bg-white p-6 shadow-[var(--shadow-card)] transition duration-200 hover:-translate-y-0.5 hover:border-[#b9c7d4] hover:shadow-[var(--shadow-float)]">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="flex min-w-0 items-center gap-3">
                                         @if ($outlet->logo_src)
@@ -108,17 +111,13 @@
                                 @endif
                                 <div class="mt-auto border-t border-line-soft pt-4 {{ $outlet->short_description ? 'mt-5' : 'mt-6' }}">
                                     <p class="text-[11px] font-semibold tracking-[0.12em] text-muted-soft uppercase">Included in</p>
-                                    @if ($outlet->packages->isNotEmpty())
-                                        <p class="mt-1.5 text-[13px] font-medium leading-relaxed text-heading">
-                                            @foreach ($outlet->packages as $package)
-                                                <a href="{{ route('packages.show', $package->slug) }}" class="transition hover:text-accent-ink hover:underline">{{ $package->name }}</a>@if (! $loop->last)<span class="text-muted-soft"> &bull; </span>@endif
-                                            @endforeach
-                                        </p>
+                                    @if ($primaryPackage)
+                                        <p class="mt-1.5 text-[13px] font-medium leading-relaxed text-heading transition group-hover:text-accent-ink">{{ $primaryPackage->name }}</p>
                                     @else
                                         <p class="mt-1.5 text-[13px] font-medium text-muted">Available on request</p>
                                     @endif
                                 </div>
-                            </article>
+                            </{{ $primaryPackage ? 'a' : 'article' }}>
                         </li>
                     @endforeach
                 </ul>

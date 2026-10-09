@@ -24,7 +24,7 @@
             <div class="relative grid items-center gap-10 md:grid-cols-12" data-reveal-group>
                 <div class="flex justify-center md:col-span-5" data-reveal>
                     <span class="flex size-44 items-center justify-center rounded-full bg-teal/25 ring-[14px] ring-teal/10 sm:size-56 lg:size-64">
-                        <img src="{{ asset('images/logo-mark-white.webp') }}" alt="" width="947" height="429" loading="lazy" decoding="async" class="h-16 w-auto sm:h-20 lg:h-24">
+                        <img src="{{ asset('images/logo-mark-teal.webp') }}" alt="" width="947" height="429" loading="lazy" decoding="async" class="h-16 w-auto sm:h-20 lg:h-24">
                     </span>
                 </div>
                 <div class="md:col-span-7" data-reveal>

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\MediaImportController;
 use App\Http\Controllers\Admin\MediaOutletController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\PackageMediaController;
+use App\Http\Controllers\Admin\PressReleaseController;
 use App\Http\Controllers\Admin\SampleReportController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Auth\LoginController;
@@ -58,6 +59,7 @@ Route::get('/content', [ContentController::class, 'edit'])->name('content.edit')
 Route::get('/content/{section}', [ContentController::class, 'edit'])->name('content.section')->whereIn('section', ContentController::SECTIONS);
 Route::put('/content', [ContentController::class, 'update'])->name('content.update');
 Route::resource('faqs', FaqController::class)->except('show');
+Route::resource('newsroom', PressReleaseController::class)->except('show')->parameters(['newsroom' => 'release']);
 Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
 Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
 

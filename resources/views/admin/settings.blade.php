@@ -19,6 +19,8 @@
                     <x-admin.input name="social_linkedin" label="LinkedIn URL" type="url" :value="$settings->all()['social_linkedin']" />
                     <x-admin.input name="social_x" label="X (Twitter) URL" type="url" :value="$settings->all()['social_x']" />
                     <x-admin.input name="social_facebook" label="Facebook URL" type="url" :value="$settings->all()['social_facebook']" />
+                    <x-admin.input name="social_instagram" label="Instagram URL" type="url" :value="$settings->all()['social_instagram']" />
+                    <x-admin.input name="social_youtube" label="YouTube URL" type="url" :value="$settings->all()['social_youtube']" help="Footer icons link to the contact page until a URL is set." />
                 </x-admin.panel>
             </div>
         </div>

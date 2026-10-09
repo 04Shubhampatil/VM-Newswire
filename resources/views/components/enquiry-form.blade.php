@@ -5,6 +5,7 @@
     'source' => null,        // path the enquiry came from
     'prefix' => 'enq',       // id prefix, so two forms on one page don't share ids
     'compact' => false,      // Stitch home card: single column, dark 40px fields, no company field
+    'nameLabel' => 'Name',   // label of the name field (the modal says "Full name")
 ])
 @php
     $selectedId = old('package_id', $selected?->id);
@@ -41,7 +42,7 @@
             ['email', 'Work Email', 'email', 'email', 'jane@company.com', 190, true],
             ['phone', 'Phone / WhatsApp', 'tel', 'tel', '+1 555 000 0000', 40, true],
         ] : [
-            ['name', 'Name', 'text', 'name', 'Your full name', 120, true],
+            ['name', $nameLabel, 'text', 'name', 'Your full name', 120, true],
             ['email', 'Business Email', 'email', 'email', 'you@company.com', 190, true],
             ['phone', 'Phone / WhatsApp', 'tel', 'tel', '+1 555 000 0000', 40, true],
             ['company', 'Company', 'text', 'organization', 'Company or agency', 150, false],
