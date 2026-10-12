@@ -3,15 +3,20 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Faq;
 use App\Models\Package;
 use App\Models\PressRelease;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-class NewsroomController extends Controller
+/**
+ * Public blog: /blogs (listing with category filter, search and pagination) and /blogs/{slug}.
+ * Posts are stored in the press_releases table (the section was the "Newsroom" until October 2026).
+ */
+class BlogController extends Controller
 {
-    public const PER_PAGE = 9;
+    public const PER_PAGE = 6;
 
     public function index(Request $request): View
     {
@@ -20,7 +25,7 @@ class NewsroomController extends Controller
             'q' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $releases = PressRelease::published()
+        $posts = PressRelease::published()
             ->when($filters['category'] ?? null, fn ($q, $category) => $q->where('category', $category))
             ->when($filters['q'] ?? null, function ($q, $term) {
                 $like = '%'.addcslashes($term, '%_\\').'%';
@@ -30,15 +35,19 @@ class NewsroomController extends Controller
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 
-        // Only categories that have at least one published release, in the configured order.
-        $used = PressRelease::published()->distinct()->pluck('category')->all();
-        $categories = array_values(array_filter(PressRelease::CATEGORIES, fn ($c) => in_array($c, $used, true)));
+        // Categories with at least one published post, in the configured order, with their counts.
+        $counts = PressRelease::published()->selectRaw('category, count(*) as total')->groupBy('category')->pluck('total', 'category');
+        $categories = collect(PressRelease::CATEGORIES)->filter(fn ($c) => isset($counts[$c]))
+            ->mapWithKeys(fn ($c) => [$c => (int) $counts[$c]])->all();
 
-        return view('public.newsroom.index', [
-            'releases' => $releases,
+        $recent = PressRelease::published()->latestFirst()->limit(4)->get();
+
+        return view('public.blogs.index', [
+            'posts' => $posts,
+            'featured' => $filters === [] ? $recent->first() : null,
             'categories' => $categories,
             'filters' => $filters,
-            'latest' => PressRelease::published()->latestFirst()->limit(5)->get(),
+            'recent' => $recent,
         ] + $this->packages());
     }
 
@@ -49,25 +58,25 @@ class NewsroomController extends Controller
             404,
         );
 
-        // Same category first, then the newest. The first four go in the sidebar, the next three in "More from".
+        // Same category first, then the newest. The first four go in the sidebar, the next three in "More from our blog".
         $others = PressRelease::published()->whereKeyNot($release->id)
             ->orderByRaw('CASE WHEN category = ? THEN 0 ELSE 1 END', [$release->category])
             ->latestFirst()
             ->limit(7)
             ->get();
 
-        $words = str_word_count(strip_tags((string) $release->body));
-
-        return view('public.newsroom.show', [
-            'release' => $release,
-            'similar' => $others->take(4),
+        return view('public.blogs.show', [
+            'post' => $release,
+            'related' => $others->take(4),
             'more' => $others->slice(4)->values(),
-            'readingMinutes' => $words > 0 ? max(1, (int) ceil($words / 220)) : null,
+            'readingMinutes' => $release->reading_minutes,
+            // General FAQs (not tied to a package) shown under every article.
+            'faqs' => Faq::active()->whereNull('package_id')->ordered()->limit(5)->get(),
         ] + $this->packages());
     }
 
     /**
-     * Packages for the "Packages to choose from" section shown under the newsroom content.
+     * Packages for the "Compare packages" slider shown under the blog content.
      *
      * @return array{packages: \Illuminate\Database\Eloquent\Collection, brands: \Illuminate\Support\Collection}
      */

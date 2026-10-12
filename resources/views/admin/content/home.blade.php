@@ -40,15 +40,17 @@
         </x-admin.panel>
 
         @php
-            $homepageOutlets = \App\Models\MediaOutlet::active()->orderByDesc('created_at')->orderByDesc('id')->get(['id', 'name', 'category', 'is_highlighted', 'poster_path']);
-            $cardLimit = \App\Support\CatalogCache::HOMEPAGE_CARD_LIMIT;
+            $homepageOutlets = \App\Models\MediaOutlet::active()
+                ->orderByDesc('is_highlighted')
+                ->orderByRaw('CASE WHEN homepage_order IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('homepage_order')->orderBy('name')
+                ->get(['id', 'name', 'category', 'is_highlighted', 'homepage_order', 'poster_path']);
         @endphp
-        <x-admin.panel title="2 · News cards" :description="'The card row under the hero. Tick the outlets to show; the '.$cardLimit.' most recently added of them appear, newest first. Each card\'s poster, name, category and short description come from the outlet.'">
+        <x-admin.panel title="2 · News cards" description="The card row under the hero. Tick the outlets to show and give each a position (1 = first). Every ticked outlet is shown; unnumbered ones follow in alphabetical order. Each card's poster, name, category and short description come from the outlet.">
             <div x-data="{ picked: {{ $homepageOutlets->where('is_highlighted', true)->count() }} }" class="flex flex-col gap-3">
                 <input type="hidden" name="homepage_outlets_present" value="1">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                    <p class="text-[13px] text-muted"><span x-text="picked"></span> selected · showing <span x-text="Math.min(picked, {{ $cardLimit }})"></span> of {{ $cardLimit }} cards
-                        <span x-show="picked > {{ $cardLimit }}" x-cloak class="text-[#7a5b00]"> · only the {{ $cardLimit }} newest selected outlets are shown</span></p>
+                    <p class="text-[13px] text-muted"><span x-text="picked"></span> card(s) shown on the homepage</p>
                     <a href="{{ route('admin.media.create') }}" class="admin-link">Add a new outlet →</a>
                 </div>
                 @if ($homepageOutlets->isEmpty())
@@ -63,6 +65,7 @@
                                         <span class="truncate text-[14px] font-semibold text-heading">{{ $outlet->name }}</span>
                                         <span class="text-[12px] text-muted">{{ $outlet->category }}@unless ($outlet->poster_path) · <span class="text-[#7a5b00]">no poster</span>@endunless</span>
                                     </span>
+                                    <input type="number" name="homepage_order[{{ $outlet->id }}]" value="{{ $outlet->homepage_order }}" min="1" max="999" placeholder="#" aria-label="Position of {{ $outlet->name }}" title="Position (1 = first)" @click.stop class="admin-input h-8 w-14 shrink-0 px-2 text-center text-[13px]">
                                     <a href="{{ route('admin.media.edit', $outlet) }}" class="admin-link shrink-0 text-[12px]" @click.stop>Edit</a>
                                 </label>
                             </li>

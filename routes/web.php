@@ -4,7 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Public\EnquiryController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\MediaNetworkController;
-use App\Http\Controllers\Public\NewsroomController;
+use App\Http\Controllers\Public\BlogController;
 use App\Http\Controllers\Public\PackageController;
 use App\Http\Controllers\Public\PageController;
 use App\Http\Controllers\Public\SampleReportController;
@@ -17,8 +17,11 @@ Route::get('/packages', [PackageController::class, 'index'])->name('packages.ind
 Route::get('/packages/{slug}', [PackageController::class, 'show'])->name('packages.show')->where('slug', '[a-z0-9-]+');
 Route::get('/packages/{package:slug}/network', [PackageController::class, 'network'])->name('packages.network');
 
-Route::get('/newsroom', [NewsroomController::class, 'index'])->name('newsroom.index');
-Route::get('/newsroom/{release:slug}', [NewsroomController::class, 'show'])->name('newsroom.show');
+Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
+Route::get('/blogs/{release:slug}', [BlogController::class, 'show'])->name('blogs.show');
+// The section was called "Newsroom" until October 2026; old links keep working.
+Route::redirect('/newsroom', '/blogs', 301);
+Route::get('/newsroom/{slug}', fn (string $slug) => redirect()->route('blogs.show', $slug, 301))->where('slug', '[a-z0-9-]+');
 
 Route::get('/media-network', MediaNetworkController::class)->name('media-network');
 Route::get('/sample-reports', [SampleReportController::class, 'index'])->name('sample-reports.index');

@@ -38,6 +38,7 @@
             <x-admin.panel title="Visibility">
                 <x-admin.toggle name="is_active" label="Active" help="Shown on the website" :checked="$package->is_active" />
                 <x-admin.toggle name="is_highlighted" label="Most popular" help="Featured treatment (one package)" :checked="$package->is_highlighted" />
+                <x-admin.toggle name="show_in_menu" label="Show in Packages menu" help="Listed in the header's Packages dropdown" :checked="$package->show_in_menu" />
                 <x-admin.input name="display_order" label="Display order" type="number" min="0" :value="$package->display_order" help="Lower numbers appear first." />
             </x-admin.panel>
             <x-admin.panel title="Pricing">

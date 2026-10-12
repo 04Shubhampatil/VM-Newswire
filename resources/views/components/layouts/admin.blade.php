@@ -22,6 +22,7 @@
     <link rel="icon" href="{{ asset('favicon.ico') }}?v=2" sizes="16x16 32x32 48x48">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     @include('partials.head-assets')
+    @stack('head')
 </head>
 <body class="site-admin min-h-screen bg-canvas text-ink" x-data="{ nav: false }" @keydown.escape.window="nav = false">
     <div class="flex min-h-screen">
@@ -73,5 +74,6 @@
     </div>
 
     <x-admin.toast />
+    @stack('scripts')
 </body>
 </html>

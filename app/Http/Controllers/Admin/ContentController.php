@@ -78,6 +78,8 @@ class ContentController extends Controller
             'homepage_outlets_present' => ['nullable', 'string'],
             'homepage_outlets' => ['nullable', 'array'],
             'homepage_outlets.*' => ['integer', 'exists:media_outlets,id'],
+            'homepage_order' => ['nullable', 'array'],
+            'homepage_order.*' => ['nullable', 'integer', 'min:1', 'max:999'],
             'news_heading' => ['nullable', 'string', 'max:160'],
             'news_button_label' => ['nullable', 'string', 'max:40'],
             'confidence_heading' => ['nullable', 'string', 'max:160'],
@@ -111,6 +113,10 @@ class ContentController extends Controller
             'directory_text' => ['nullable', 'string', 'max:300'],
             'remove_media_network_image' => ['boolean'],
             'footer_text' => ['sometimes', 'required', 'string', 'max:300'],
+            'footer_columns_present' => ['nullable', 'string'],
+            'footer_columns' => ['nullable', 'array', 'max:6'],
+            'footer_columns.*.title' => ['nullable', 'string', 'max:40'],
+            'footer_columns.*.links' => ['nullable', 'string', 'max:3000'],
             'privacy_content' => ['nullable', 'string', 'max:50000'],
             'privacy_updated_at' => ['nullable', 'date'],
             'terms_content' => ['nullable', 'string', 'max:50000'],
@@ -172,17 +178,42 @@ class ContentController extends Controller
         }
         unset($data['strip_logos'], $data['strip_logo_files'], $data['media_strip_logos_present']);
 
-        // Homepage news cards: the checklist sets "show on homepage" for every active outlet in one go.
+        // Homepage news cards: the checklist sets "show on homepage" and the position for every active outlet in one go.
         if ($request->has('homepage_outlets_present')) {
             $chosen = array_map('intval', $request->input('homepage_outlets', []));
-            foreach (MediaOutlet::active()->get(['id', 'slug', 'is_highlighted']) as $outlet) {
+            $positions = $request->input('homepage_order', []);
+            foreach (MediaOutlet::active()->get(['id', 'slug', 'is_highlighted', 'homepage_order']) as $outlet) {
                 $show = in_array($outlet->id, $chosen, true);
-                if ($outlet->is_highlighted !== $show) {
-                    $outlet->update(['is_highlighted' => $show]);
+                $position = $show && filled($positions[$outlet->id] ?? null) ? (int) $positions[$outlet->id] : null;
+                if ($outlet->is_highlighted !== $show || $outlet->homepage_order !== $position) {
+                    $outlet->update(['is_highlighted' => $show, 'homepage_order' => $position]);
                 }
             }
         }
-        unset($data['homepage_outlets'], $data['homepage_outlets_present']);
+        unset($data['homepage_outlets'], $data['homepage_outlets_present'], $data['homepage_order']);
+
+        // Footer link columns: "Label | URL" lines per column; an empty editor restores the built-in columns.
+        if ($request->has('footer_columns') || $request->has('footer_columns_present')) {
+            $columns = [];
+            foreach ($request->input('footer_columns', []) as $column) {
+                $title = trim($column['title'] ?? '');
+                $links = [];
+                foreach (preg_split('/\R/', (string) ($column['links'] ?? '')) as $line) {
+                    [$label, $url] = array_pad(array_map('trim', explode('|', $line, 2)), 2, '');
+                    if ($label !== '' && $url !== '' && (str_starts_with($url, '/') || str_starts_with($url, '#') || preg_match('#^https?://#i', $url))) {
+                        $links[] = ['label' => $label, 'url' => $url];
+                    }
+                }
+                if ($title !== '' && $links) {
+                    $columns[] = ['title' => $title, 'links' => $links];
+                }
+            }
+            $data['footer_columns'] = $columns ? json_encode($columns) : '';
+        }
+        unset($data['footer_columns_present']);
+        if (is_array($data['footer_columns'] ?? null)) {
+            unset($data['footer_columns']);
+        }
 
         // Confidence cards: keep every card with a quote; an empty list restores the built-in cards.
         $cardsJson = null;

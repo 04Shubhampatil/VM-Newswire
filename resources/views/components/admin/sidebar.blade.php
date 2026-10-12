@@ -13,7 +13,7 @@
         ],
         'Website' => [
             ['Website Content', 'edit', 'admin.content.edit', 'admin.content.*'],
-            ['Newsroom', 'file', 'admin.newsroom.index', 'admin.newsroom.*'],
+            ['Blogs', 'file', 'admin.blogs.index', 'admin.blogs.*'],
             ['FAQs', 'info', 'admin.faqs.index', 'admin.faqs.*'],
         ],
         'System' => [

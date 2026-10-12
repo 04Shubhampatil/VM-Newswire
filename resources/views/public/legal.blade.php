@@ -23,5 +23,5 @@
             </div>
         </div>
     </section>
-    <x-cta-band />
+    <x-home.final-cta heading="Ready to distribute your story?" text="Send an enquiry today. No payment is required and our team replies personally." :href="route('contact').'#enquire'" />
 </x-layouts.public>

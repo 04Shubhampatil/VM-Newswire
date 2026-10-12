@@ -16,7 +16,24 @@ use Throwable;
  */
 class CatalogCache
 {
-    private const KEYS = ['catalog.footer_packages', 'catalog.media_summary', 'catalog.highlighted_outlets'];
+    private const KEYS = ['catalog.footer_packages', 'catalog.menu_packages', 'catalog.media_summary', 'catalog.highlighted_outlets'];
+
+    /**
+     * Packages the admin ticked "Show in Packages menu", in display order (header dropdown).
+     *
+     * @return Collection<int, object{id: int, name: string, slug: string}>
+     */
+    public static function menuPackages(): Collection
+    {
+        try {
+            $rows = Cache::remember('catalog.menu_packages', 3600, fn () => Package::active()->where('show_in_menu', true)->ordered()
+                ->get(['id', 'name', 'slug'])->map->only(['id', 'name', 'slug'])->all());
+        } catch (Throwable) {
+            $rows = [];
+        }
+
+        return collect($rows)->map(fn (array $row) => (object) $row);
+    }
 
     /**
      * @return Collection<int, object{id: int, name: string, slug: string}>
@@ -66,18 +83,18 @@ class CatalogCache
         }));
     }
 
-    public const HOMEPAGE_CARD_LIMIT = 8;
-
     /**
-     * Outlets shown as the homepage news cards: the most recently added of those the admin marked
-     * "Show on homepage", newest first, capped at HOMEPAGE_CARD_LIMIT.
+     * Outlets shown as the homepage news cards: every outlet the admin marked "Show on homepage", in the
+     * position the admin gave each one (unnumbered outlets follow, alphabetically).
      *
      * @return Collection<int, object{id: int, name: string, slug: string, category: string, short_description: ?string, description: ?string, poster_src: ?string, poster_width: ?int, poster_height: ?int, website_url: ?string}>
      */
     public static function highlightedOutlets(): Collection
     {
         $rows = Cache::remember('catalog.highlighted_outlets', 3600, fn () => MediaOutlet::active()
-            ->where('is_highlighted', true)->orderByDesc('created_at')->orderByDesc('id')->limit(self::HOMEPAGE_CARD_LIMIT)
+            ->where('is_highlighted', true)
+            ->orderByRaw('CASE WHEN homepage_order IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('homepage_order')->orderBy('name')
             ->get()->map->toPosterArray()->all());
 
         return collect($rows)->map(fn (array $row) => (object) $row);

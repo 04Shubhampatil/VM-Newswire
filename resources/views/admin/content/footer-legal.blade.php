@@ -13,6 +13,19 @@
             <x-admin.textarea name="footer_text" label="Footer description" :value="$settings->get('footer_text')" rows="2" required maxlength="300" />
         </x-admin.panel>
 
+        @php $footerColumns = array_pad($settings->footerColumns(), 5, ['title' => '', 'links' => []]); @endphp
+        <x-admin.panel title="Footer link columns" description="Up to five columns of links. One link per line as “Label | URL”. URLs can be a page path such as /packages, /contact#enquire or /media-network?category=Finance, or a full https:// address. Leave a column's title empty to hide it; clear every column to restore the built-in links.">
+            <input type="hidden" name="footer_columns_present" value="1">
+            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+                @foreach ($footerColumns as $i => $column)
+                    <div class="flex flex-col gap-3">
+                        <x-admin.input name="footer_columns[{{ $i }}][title]" label="Column {{ $i + 1 }} title" :value="$column['title']" maxlength="40" />
+                        <x-admin.textarea name="footer_columns[{{ $i }}][links]" label="Links" :value="collect($column['links'])->map(fn ($l) => $l['label'].' | '.$l['url'])->join(PHP_EOL)" rows="7" mono />
+                    </div>
+                @endforeach
+            </div>
+        </x-admin.panel>
+
         <div class="grid items-start gap-6 xl:grid-cols-2">
             <x-admin.panel title="Privacy policy" description="Markdown is supported. HTML is removed for safety.">
                 <x-admin.input name="privacy_updated_at" label="Last updated" type="date" :value="$settings->all()['privacy_updated_at']" class="max-w-xs" />

@@ -18,7 +18,7 @@ class PressReleaseController extends Controller
     {
         $status = $request->query('status');
 
-        return view('admin.newsroom.index', [
+        return view('admin.blogs.index', [
             'releases' => PressRelease::query()
                 ->when($status === 'published', fn ($q) => $q->where('is_published', true))
                 ->when($status === 'draft', fn ($q) => $q->where('is_published', false))
@@ -36,7 +36,7 @@ class PressReleaseController extends Controller
 
     public function create(): View
     {
-        return view('admin.newsroom.form', [
+        return view('admin.blogs.form', [
             'release' => new PressRelease(['is_published' => true, 'category' => 'Business', 'published_at' => now()]),
         ]);
     }
@@ -54,12 +54,12 @@ class PressReleaseController extends Controller
 
         $release->save();
 
-        return redirect()->to(route('admin.newsroom.index'))->with('toast', 'Press release added.');
+        return redirect()->to(route('admin.blogs.index'))->with('toast', 'Blog post added.');
     }
 
     public function edit(PressRelease $release): View
     {
-        return view('admin.newsroom.form', ['release' => $release]);
+        return view('admin.blogs.form', ['release' => $release]);
     }
 
     public function update(Request $request, PosterImage $images, PressRelease $release): RedirectResponse
@@ -79,7 +79,7 @@ class PressReleaseController extends Controller
 
         $release->save();
 
-        return redirect()->to(route('admin.newsroom.index'))->with('toast', 'Press release updated.');
+        return redirect()->to(route('admin.blogs.index'))->with('toast', 'Blog post updated.');
     }
 
     public function destroy(PosterImage $images, PressRelease $release): RedirectResponse
@@ -87,7 +87,7 @@ class PressReleaseController extends Controller
         $images->delete($release->image_path);
         $release->delete();
 
-        return redirect()->to(route('admin.newsroom.index'))->with('toast', 'Press release deleted.');
+        return redirect()->to(route('admin.blogs.index'))->with('toast', 'Blog post deleted.');
     }
 
     /**
@@ -102,6 +102,8 @@ class PressReleaseController extends Controller
             'author' => ['nullable', 'string', 'max:120'],
             'excerpt' => ['nullable', 'string', 'max:400'],
             'body' => ['required', 'string', 'max:60000'],
+            'meta_title' => ['nullable', 'string', 'max:120'],
+            'meta_description' => ['nullable', 'string', 'max:320'],
             'published_at' => ['nullable', 'date'],
             'is_published' => ['boolean'],
             'image' => ['nullable', 'file', 'max:'.config('vmnewswire.posters.max_kb')],
@@ -119,7 +121,7 @@ class PressReleaseController extends Controller
         $old = $release->image_path;
 
         if ($request->hasFile('image')) {
-            $release->image_path = $images->store($request->file('image'), 'newsroom-'.Str::limit(Str::slug($release->title), 40, ''))['path'];
+            $release->image_path = $images->store($request->file('image'), 'blog-'.Str::limit(Str::slug($release->title), 40, ''))['path'];
             $images->delete($old);
         } elseif ($request->boolean('remove_image') && $old) {
             $images->delete($old);

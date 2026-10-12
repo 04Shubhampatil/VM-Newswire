@@ -67,6 +67,7 @@ class SiteSettings
             'packages_heading' => 'Compare packages *at a glance.*',
             'packages_text' => 'Find the distribution package that matches your reach, media and reporting requirements.',
             'footer_text' => 'Global press release distribution across leading news platforms, business publications and digital media networks.',
+            'footer_columns' => '',
             'social_linkedin' => '',
             'social_x' => '',
             'social_facebook' => '',
@@ -190,6 +191,50 @@ class SiteSettings
         ['quote' => 'One fixed price per press release, published up front. You can see the headline platforms and the extended network for every package before you commit.', 'name' => 'The VM Newswire team', 'role' => 'Distribution packages'],
         ['quote' => 'After distribution you receive a report with every placement and live link, ready to forward. Download a sample report before you choose.', 'name' => 'The VM Newswire team', 'role' => 'Reporting'],
     ];
+
+    /** Built-in footer link columns (URLs are site-relative paths, resolved when rendered). */
+    public const DEFAULT_FOOTER_COLUMNS = [
+        ['title' => 'Company', 'links' => [
+            ['label' => 'About VM Newswire', 'url' => '/about'],
+            ['label' => 'Contact', 'url' => '/contact'],
+            ['label' => 'Sign In', 'url' => '/login'],
+        ]],
+        ['title' => 'Services', 'links' => [
+            ['label' => 'Press Release Distribution', 'url' => '/packages'],
+            ['label' => 'Media Network', 'url' => '/media-network'],
+            ['label' => 'Reporting & Analytics', 'url' => '/sample-reports'],
+            ['label' => 'Send an Enquiry', 'url' => '/contact#enquire'],
+        ]],
+        ['title' => 'Solutions', 'links' => [
+            ['label' => 'Agencies', 'url' => '/contact'],
+            ['label' => 'Public Companies', 'url' => '/media-network?category=Markets'],
+            ['label' => 'Industry Solutions', 'url' => '/media-network'],
+        ]],
+        ['title' => 'Blogs', 'links' => [
+            ['label' => 'All blog posts', 'url' => '/blogs'],
+            ['label' => 'Media Relations', 'url' => '/blogs?category=Media+Relations'],
+            ['label' => 'Press Release Writing', 'url' => '/blogs?category=Press+Release+Writing'],
+            ['label' => 'PR Strategy', 'url' => '/blogs?category=PR+Strategy'],
+            ['label' => 'Industry Insights', 'url' => '/blogs?category=Industry+Insights'],
+        ]],
+        ['title' => 'Resources', 'links' => [
+            ['label' => 'For Journalists', 'url' => '/#journalists'],
+            ['label' => 'Sample Reports', 'url' => '/sample-reports'],
+            ['label' => 'FAQ', 'url' => '/faq'],
+        ]],
+    ];
+
+    /**
+     * Footer link columns; the built-in five until the admin saves their own.
+     *
+     * @return array<int, array{title: string, links: array<int, array{label: string, url: string}>}>
+     */
+    public function footerColumns(): array
+    {
+        $decoded = json_decode((string) $this->get('footer_columns'), true);
+
+        return is_array($decoded) && $decoded !== [] ? $decoded : self::DEFAULT_FOOTER_COLUMNS;
+    }
 
     /**
      * Homepage "Deliver Your News with Confidence" cards; the built-in three until the admin saves their own.

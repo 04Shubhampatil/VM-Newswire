@@ -18,7 +18,7 @@ class PublicPagesTest extends TestCase
             'home' => ['/'],
             'packages' => ['/packages'],
             'media network' => ['/media-network'],
-            'newsroom' => ['/newsroom'],
+            'blogs' => ['/blogs'],
             'about' => ['/about'],
             'contact' => ['/contact'],
             'faq' => ['/faq'],
@@ -51,6 +51,18 @@ class PublicPagesTest extends TestCase
             ->assertOk()
             ->assertSee('Visible Package')
             ->assertDontSee('Hidden Package');
+    }
+
+    public function test_header_packages_menu_lists_only_packages_the_admin_ticked(): void
+    {
+        Package::factory()->create(['name' => 'Menu Package', 'show_in_menu' => true]);
+        Package::factory()->create(['name' => 'Quiet Package', 'show_in_menu' => false]);
+
+        $html = $this->get('/')->assertOk()->getContent();
+        $menu = substr($html, strpos($html, 'All packages'), 1200);
+
+        $this->assertStringContainsString('Menu Package', $menu);
+        $this->assertStringNotContainsString('Quiet Package', $menu);
     }
 
     public function test_packages_page_shows_comparison_with_buy_now_popover(): void

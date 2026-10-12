@@ -31,13 +31,21 @@ class AdminAuthTest extends TestCase
 
     public function test_admin_can_log_in_and_out(): void
     {
-        $admin = $this->admin(['email' => 'owner@example.com', 'password' => 'correct-horse-42-battery']);
+        $admin = $this->admin(['name' => 'owner', 'email' => 'owner@example.com', 'password' => 'correct-horse-42-battery']);
 
-        $this->post('/login', ['login' => 'owner@example.com', 'password' => 'correct-horse-42-battery'])
+        $this->post('/login', ['login' => 'owner', 'password' => 'correct-horse-42-battery'])
             ->assertRedirect(route('admin.dashboard'));
         $this->assertAuthenticatedAs($admin);
 
         $this->post('/admin/logout')->assertRedirect('/login');
+        $this->assertGuest();
+    }
+
+    public function test_email_address_is_not_accepted_as_a_login(): void
+    {
+        $this->admin(['name' => 'owner', 'email' => 'owner@example.com', 'password' => 'correct-horse-42-battery']);
+
+        $this->post('/login', ['login' => 'owner@example.com', 'password' => 'correct-horse-42-battery'])->assertSessionHasErrors('login');
         $this->assertGuest();
     }
 
@@ -51,29 +59,29 @@ class AdminAuthTest extends TestCase
 
     public function test_wrong_password_is_rejected(): void
     {
-        $this->admin(['email' => 'owner@example.com']);
+        $this->admin(['name' => 'owner', 'email' => 'owner@example.com']);
 
-        $this->post('/login', ['login' => 'owner@example.com', 'password' => 'wrong'])->assertSessionHasErrors('login');
+        $this->post('/login', ['login' => 'owner', 'password' => 'wrong'])->assertSessionHasErrors('login');
         $this->assertGuest();
     }
 
     public function test_non_admin_cannot_log_in_to_admin(): void
     {
-        User::factory()->create(['email' => 'user@example.com', 'role' => 'editor', 'password' => 'secret-password-1']);
+        User::factory()->create(['name' => 'editor', 'email' => 'user@example.com', 'role' => 'editor', 'password' => 'secret-password-1']);
 
-        $this->post('/login', ['login' => 'user@example.com', 'password' => 'secret-password-1'])->assertSessionHasErrors('login');
+        $this->post('/login', ['login' => 'editor', 'password' => 'secret-password-1'])->assertSessionHasErrors('login');
         $this->assertGuest();
     }
 
     public function test_login_is_rate_limited(): void
     {
-        $this->admin(['email' => 'owner@example.com']);
+        $this->admin(['name' => 'owner', 'email' => 'owner@example.com']);
 
         foreach (range(1, 5) as $i) {
-            $this->post('/login', ['login' => 'owner@example.com', 'password' => 'wrong']);
+            $this->post('/login', ['login' => 'owner', 'password' => 'wrong']);
         }
 
-        $this->post('/login', ['login' => 'owner@example.com', 'password' => 'wrong'])->assertStatus(429);
+        $this->post('/login', ['login' => 'owner', 'password' => 'wrong'])->assertStatus(429);
     }
 
     public function test_admin_with_one_time_password_must_change_it(): void

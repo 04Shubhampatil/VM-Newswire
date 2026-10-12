@@ -369,12 +369,46 @@ class AdminContentTest extends TestCase
         $this->get('/')->assertSee('Chosen Outlet')->assertDontSee('Dropped Outlet');
     }
 
-    public function test_homepage_shows_only_the_eight_newest_selected_outlets(): void
+    public function test_homepage_shows_every_selected_outlet_in_the_admin_order(): void
     {
-        foreach (range(1, 9) as $i) {
-            MediaOutlet::factory()->create(['name' => "Outlet Number {$i}", 'is_highlighted' => true, 'created_at' => now()->subDays(10 - $i)]);
-        }
+        $outlets = collect(range(1, 9))->map(fn ($i) => MediaOutlet::factory()->create(['name' => "Outlet Number {$i}", 'is_highlighted' => false]));
 
-        $this->get('/')->assertSee('Outlet Number 9')->assertSee('Outlet Number 2')->assertDontSee('Outlet Number 1');
+        $this->actingAs($this->admin())->put(route('admin.content.update'), [
+            'homepage_outlets_present' => '1',
+            'homepage_outlets' => $outlets->pluck('id')->all(),
+            'homepage_order' => [$outlets[8]->id => 1, $outlets[4]->id => 2],
+        ])->assertSessionHas('toast');
+
+        $this->assertSame(1, $outlets[8]->fresh()->homepage_order);
+        $this->assertNull($outlets[0]->fresh()->homepage_order);
+
+        // All nine appear: the numbered ones first, then the rest alphabetically.
+        $this->get('/')
+            ->assertSeeInOrder(['Outlet Number 9', 'Outlet Number 5', 'Outlet Number 1', 'Outlet Number 2', 'Outlet Number 8'])
+            ->assertSee('Outlet Number 7');
+    }
+
+    public function test_footer_link_columns_are_editable_and_fall_back_to_the_defaults(): void
+    {
+        // Default columns render ("PR / IR Professionals" were removed from the footer defaults; the solutions section still mentions them).
+        $this->get('/')->assertSee('Industry Solutions');
+
+        $this->actingAs($this->admin())->put(route('admin.content.update'), [
+            'footer_columns_present' => '1',
+            'footer_columns' => [
+                ['title' => 'Explore', 'links' => "Our packages | /packages\nPartner site | https://example.com/partners\nignored line without url\nBad | javascript:alert(1)"],
+                ['title' => '', 'links' => 'Hidden | /faq'],
+            ],
+        ])->assertSessionHas('toast');
+
+        $this->get('/')
+            ->assertSee('Explore')
+            ->assertSee('Our packages')
+            ->assertSee('https://example.com/partners', false)
+            ->assertDontSee('javascript:alert', false)
+            ->assertDontSee('Industry Solutions');
+
+        $this->actingAs($this->admin())->put(route('admin.content.update'), ['footer_columns_present' => '1', 'footer_columns' => []]);
+        $this->get('/')->assertSee('Industry Solutions')->assertDontSee('Partner site');
     }
 }

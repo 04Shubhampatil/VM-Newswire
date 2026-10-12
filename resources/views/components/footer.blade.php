@@ -14,43 +14,21 @@
         ['label' => 'YouTube', 'url' => $site->get('social_youtube'), 'icon' => '<path d="M23.5 7.2a3 3 0 0 0-2.1-2.1C19.5 4.6 12 4.6 12 4.6s-7.5 0-9.4.5A3 3 0 0 0 .5 7.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-4.8zM9.6 15.6V8.4l6.2 3.6-6.2 3.6z"/>'],
     ])->map(fn (array $social) => $social + ['href' => filled($social['url']) ? $social['url'] : route('contact')]);
 
-    $columns = [
-        'Company' => [
-            ['About VM Newswire', route('about')],
-            ['Contact', route('contact')],
-            ['Sign In', route('login')],
-        ],
-        'Services' => [
-            ['Press Release Distribution', route('packages.index')],
-            ['Media Network', route('media-network')],
-            ['Reporting & Analytics', route('sample-reports.index')],
-            ['Send an Enquiry', route('contact').'#enquire'],
-        ],
-        'Solutions' => [
-            ['PR Professionals', route('packages.index')],
-            ['IR Professionals', route('media-network', ['category' => 'Finance'])],
-            ['Agencies', route('contact')],
-            ['Public Companies', route('media-network', ['category' => 'Markets'])],
-            ['Industry Solutions', route('media-network')],
-        ],
-        'Newsroom' => collect(config('vmnewswire.media_categories'))
-            ->take(5)
-            ->map(fn (string $category) => [$category, route('media-network', ['category' => $category])])
-            ->values()
-            ->all(),
-        'Resources' => [
-            ['For Journalists', route('home').'#journalists'],
-            ['Sample Reports', route('sample-reports.index')],
-            ['FAQ', route('faq')],
-        ],
-    ];
+    // Link columns come from Admin → Website Content → Footer & legal (built-in defaults until edited).
+    // Site-relative URLs ("/about", "/#journalists") are resolved against the site root; absolute URLs are kept.
+    $columns = collect($site->footerColumns())->mapWithKeys(fn (array $column) => [
+        $column['title'] => collect($column['links'])->map(fn (array $link) => [
+            $link['label'],
+            str_starts_with($link['url'], '/') ? url($link['url']) : $link['url'],
+        ])->all(),
+    ])->all();
 @endphp
 <footer class="site-footer">
     <div class="container-site pt-14 pb-10 lg:pt-16">
         <div class="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
             @foreach ($columns as $title => $links)
-                <nav aria-labelledby="footer-{{ Str::slug($title) }}">
-                    <h2 id="footer-{{ Str::slug($title) }}" class="site-footer-title mb-4 text-[13px] font-semibold">{{ $title }}</h2>
+                <nav aria-labelledby="footer-{{ Str::slug($title) }}-{{ $loop->index }}">
+                    <h2 id="footer-{{ Str::slug($title) }}-{{ $loop->index }}" class="site-footer-title mb-4 text-[13px] font-semibold">{{ $title }}</h2>
                     <ul class="space-y-2.5">
                         @foreach ($links as [$label, $url])
                             <li><a href="{{ $url }}" class="site-footer-link text-[14px] transition">{{ $label }}</a></li>

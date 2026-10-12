@@ -1,7 +1,7 @@
 @props(['packages', 'brands'])
 {{--
     Pricing tier (24-7 "Pricing Plans to Choose From"): grey ground, centred heading, then a horizontal card slider.
-    The frame shows five cards on wide screens (three on laptops, two on tablets, one-and-a-bit on phones) and the
+    The frame shows four cards on wide screens (three on laptops, two on tablets, one-and-a-bit on phones) and the
     rest slide in with the prev/next arrows, a swipe, or a trackpad scroll. Without JS every card stays visible,
     the track scrolls natively and the brand chips are inert.
 --}}
@@ -55,7 +55,7 @@
                  class="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth scroll-px-1 px-1 pt-5 pb-4 [scrollbar-width:none] motion-reduce:scroll-auto focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent [&::-webkit-scrollbar]:hidden" data-reveal-group>
                 @foreach ($packages as $i => $package)
                     <div x-show="brand === 'All' || brand === @js($package->brand)" data-reveal data-slide
-                         class="flex shrink-0 snap-start basis-[88%] sm:basis-[calc((100%-1rem)/2)] lg:basis-[calc((100%-2rem)/3)] xl:basis-[calc((100%-4rem)/5)]">
+                         class="pkg-slide flex shrink-0 snap-start basis-[88%] sm:basis-[calc((100%-1rem)/2)] lg:basis-[calc((100%-2rem)/3)]">
                         <x-package-card :package="$package" :index="$i" class="w-full" />
                     </div>
                 @endforeach

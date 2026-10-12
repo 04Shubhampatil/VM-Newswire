@@ -18,7 +18,7 @@ class LoginController extends Controller
     }
 
     /**
-     * Signs in with either the username (the user's name, e.g. "admin") or the email address.
+     * Signs in with the admin username only (the user's name); email addresses are not accepted.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -29,7 +29,7 @@ class LoginController extends Controller
 
         $login = trim($data['login']);
         $email = str_contains($login, '@')
-            ? strtolower($login)
+            ? null
             : User::whereRaw('LOWER(name) = ?', [strtolower($login)])->value('email');
 
         if (! $email || ! Auth::attempt(['email' => $email, 'password' => $data['password']], $request->boolean('remember'))) {

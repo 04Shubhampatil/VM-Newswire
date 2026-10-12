@@ -40,7 +40,7 @@
                         <article data-reveal data-slide
                                  class="group flex shrink-0 snap-start basis-[84%] sm:basis-[calc((100%-1.5rem)/2)] lg:basis-[calc((100%-3rem)/3)]">
                             <button type="button" @click="$dispatch('open-outlet', @js($outlet->slug))" aria-haspopup="dialog"
-                                    class="flex w-full flex-col rounded-2xl border border-line/70 bg-white p-3 text-left shadow-[0_10px_28px_-14px_rgba(11,22,40,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-float)]"
+                                    class="flex w-full cursor-pointer flex-col rounded-2xl border border-line/70 bg-white p-3 text-left shadow-[0_10px_28px_-14px_rgba(11,22,40,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-float)]"
                                     data-track="outlet_click" data-track-label="{{ $outlet->name }}">
                                 <span class="relative block aspect-[16/10] w-full overflow-hidden rounded-xl bg-canvas-deep">
                                     @if ($outlet->poster_src)

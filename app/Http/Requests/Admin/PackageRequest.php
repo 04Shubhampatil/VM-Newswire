@@ -51,6 +51,7 @@ class PackageRequest extends FormRequest
             'currency' => ['required', Rule::in(self::CURRENCIES)],
             'is_active' => ['boolean'],
             'is_highlighted' => ['boolean'],
+            'show_in_menu' => ['boolean'],
             'display_order' => ['nullable', 'integer', 'min:0', 'max:100000'],
             'meta_title' => ['nullable', 'string', 'max:120'],
             'meta_description' => ['nullable', 'string', 'max:320'],

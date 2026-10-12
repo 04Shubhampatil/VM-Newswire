@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'name', 'slug', 'brand', 'short_description', 'full_content', 'distribution_summary', 'features',
-    'price', 'currency', 'is_active', 'is_highlighted', 'display_order', 'meta_title', 'meta_description',
+    'price', 'currency', 'is_active', 'is_highlighted', 'show_in_menu', 'display_order', 'meta_title', 'meta_description',
 ])]
 class Package extends Model
 {
@@ -31,6 +31,7 @@ class Package extends Model
             'price' => 'decimal:2',
             'is_active' => 'boolean',
             'is_highlighted' => 'boolean',
+            'show_in_menu' => 'boolean',
             'display_order' => 'integer',
         ];
     }

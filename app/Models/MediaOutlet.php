@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'name', 'slug', 'website_url', 'logo_url', 'logo_path', 'poster_path', 'poster_width', 'poster_height',
-    'category', 'short_description', 'description', 'is_active', 'is_highlighted', 'display_order',
+    'category', 'short_description', 'description', 'is_active', 'is_highlighted', 'homepage_order', 'display_order',
 ])]
 class MediaOutlet extends Model
 {

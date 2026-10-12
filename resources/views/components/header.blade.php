@@ -4,20 +4,17 @@
      * "Services & Solutions" and "Resources" open small dropdowns; every link points at a registered route.
      */
     $nav = [
-        ['label' => 'Newsroom', 'url' => route('newsroom.index'), 'active' => 'newsroom.*'],
-        // Packages: every active package, then the comparison page.
+        ['label' => 'About Us', 'url' => route('about'), 'active' => 'about'],
+        // Packages: the comparison page first, then the packages ticked "Show in Packages menu" in the admin.
         ['label' => 'Packages', 'active' => 'packages.*', 'children' => [
-            ...\App\Support\CatalogCache::footerPackages()->map(fn ($p) => [$p->name, route('packages.show', $p->slug)])->all(),
             ['All packages', route('packages.index')],
+            ...\App\Support\CatalogCache::menuPackages()->map(fn ($p) => [$p->name, route('packages.show', $p->slug)])->all(),
         ]],
         ['label' => 'Services & Solutions', 'active' => null, 'children' => [
             ['Media Network', route('media-network')],
             ['Reporting & Analytics', route('sample-reports.index')],
         ]],
-        ['label' => 'Resources', 'active' => 'faq', 'children' => [
-            ['FAQ', route('faq')],
-            ['About VM Newswire', route('about')],
-        ]],
+        ['label' => 'Blogs', 'url' => route('blogs.index'), 'active' => 'blogs.*'],
         ['label' => 'Contact Us', 'url' => route('contact'), 'active' => 'contact'],
     ];
     $email = (string) $site->get('company_email');

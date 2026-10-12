@@ -59,7 +59,7 @@ Route::get('/content', [ContentController::class, 'edit'])->name('content.edit')
 Route::get('/content/{section}', [ContentController::class, 'edit'])->name('content.section')->whereIn('section', ContentController::SECTIONS);
 Route::put('/content', [ContentController::class, 'update'])->name('content.update');
 Route::resource('faqs', FaqController::class)->except('show');
-Route::resource('newsroom', PressReleaseController::class)->except('show')->parameters(['newsroom' => 'release']);
+Route::resource('blogs', PressReleaseController::class)->except('show')->parameters(['blogs' => 'release']);
 Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
 Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
 

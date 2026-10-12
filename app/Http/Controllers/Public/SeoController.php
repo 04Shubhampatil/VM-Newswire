@@ -11,14 +11,14 @@ class SeoController extends Controller
 {
     public function sitemap(): Response
     {
-        $static = collect(['home', 'packages.index', 'newsroom.index', 'media-network', 'sample-reports.index', 'about', 'contact', 'faq', 'privacy', 'terms'])
+        $static = collect(['home', 'packages.index', 'blogs.index', 'media-network', 'sample-reports.index', 'about', 'contact', 'faq', 'privacy', 'terms'])
             ->map(fn ($name) => ['loc' => route($name), 'lastmod' => null]);
 
         $packages = Package::active()->ordered()->get(['slug', 'updated_at'])
             ->map(fn ($p) => ['loc' => route('packages.show', $p->slug), 'lastmod' => $p->updated_at?->toAtomString()]);
 
         $releases = PressRelease::published()->latestFirst()->get(['slug', 'updated_at'])
-            ->map(fn ($r) => ['loc' => route('newsroom.show', $r->slug), 'lastmod' => $r->updated_at?->toAtomString()]);
+            ->map(fn ($r) => ['loc' => route('blogs.show', $r->slug), 'lastmod' => $r->updated_at?->toAtomString()]);
 
         return response()
             ->view('public.sitemap', ['urls' => $static->concat($packages)->concat($releases)])

@@ -32,7 +32,7 @@
             <div class="w-full max-w-[400px]">
                 <x-brand-logo :size="36" class="mb-8 lg:hidden" />
                 <h1 class="text-[26px] font-bold tracking-[-0.01em] text-heading">Sign in</h1>
-                <p class="mt-1 mb-7 text-[14px] text-muted">Use your admin username or email.</p>
+                <p class="mt-1 mb-7 text-[14px] text-muted">Use your admin username.</p>
 
                 @if (session('status'))
                     <x-admin.alert type="success" class="mb-5">{{ session('status') }}</x-admin.alert>
@@ -41,7 +41,7 @@
                 <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-5">
                     @csrf
                     <div>
-                        <label for="login" class="admin-label">Username or email</label>
+                        <label for="login" class="admin-label">Username</label>
                         <input id="login" name="login" type="text" value="{{ old('login') }}" required autofocus autocomplete="username"
                                class="admin-input h-11 @error('login') border-danger @enderror" @error('login') aria-invalid="true" aria-describedby="login-error" @enderror>
                         @error('login')<p id="login-error" class="admin-help text-danger">{{ $message }}</p>@enderror

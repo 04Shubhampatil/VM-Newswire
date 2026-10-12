@@ -71,6 +71,13 @@
                             <span class="btn-pill-icon"><x-icon name="arrow-right" :size="15" :stroke="2.4" /></span>
                         </a>
                     </div>
+                    @if ($package->currentReport)
+                        <p class="pk-report-link">
+                            <x-icon name="file" :size="16" :stroke="2" />
+                            <a href="{{ route('reports.view', $package->slug) }}" target="_blank" rel="noopener" data-track="sample_report_click" data-track-package="{{ $package->name }}">View the sample distribution report</a>
+                            <span>PDF · {{ $package->currentReport->formatted_size }}</span>
+                        </p>
+                    @endif
                 </div>
 
                 <div>
@@ -269,6 +276,19 @@
                         <li><x-icon name="check" :size="16" :stroke="2.4" class="pk-check" style="margin-top:0" />{{ $point }}</li>
                     @endforeach
                 </ul>
+                @if ($package->currentReport)
+                    <div class="pk-report">
+                        <span class="pk-report-icon"><x-icon name="file" :size="20" :stroke="1.8" /></span>
+                        <div>
+                            <p class="pk-report-title">Sample distribution report</p>
+                            <p class="pk-report-meta">See what you receive after distribution · PDF · {{ $package->currentReport->formatted_size }}</p>
+                        </div>
+                        <span class="pk-btn-row">
+                            <a href="{{ route('reports.view', $package->slug) }}" target="_blank" rel="noopener" class="pk-link-btn" data-track="sample_report_click" data-track-package="{{ $package->name }}">Preview</a>
+                            <a href="{{ route('reports.download', $package->slug) }}" class="pk-link-btn" data-track="sample_report_click" data-track-package="{{ $package->name }}">Download</a>
+                        </span>
+                    </div>
+                @endif
                 <div class="pk-btn-row" style="margin-top:28px">
                     <button type="button" x-data @click="$dispatch('open-enquiry', {{ $package->id }})" aria-haspopup="dialog" class="btn-pill btn-teal" data-track="cta_click" data-track-label="Package value: Start Your Enquiry" data-track-package="{{ $package->name }}">
                         Start Your Enquiry
