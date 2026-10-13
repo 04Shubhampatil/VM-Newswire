@@ -14,7 +14,7 @@ We've received your enquiry{{ $enquiry->package_name_snapshot ? ' about **'.$enq
 If you have questions in the meantime, just reply to this email.
 
 Kind regards,<br>
-The {{ $settings->get('company_name') }} team
+{{ $settings->get('company_name') }} team
 
 {{ $settings->get('company_email') }}@if ($settings->get('phone')) · {{ $settings->get('phone') }}@endif<br>
 {{ config('app.url') }}

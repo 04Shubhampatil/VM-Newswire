@@ -74,7 +74,7 @@ class PublicPagesTest extends TestCase
             ->assertSee('Compare packages')
             ->assertSee('GlobeNewswire Basic')
             ->assertSee('$299')
-            ->assertSee('Buy Now')
+            ->assertSee('Enquire Now')
             ->assertSee("\$dispatch('open-enquiry', {$package->id})", false)
             ->assertSee(route('packages.show', $package->slug), false)
             ->assertSee('Coming soon')

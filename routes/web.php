@@ -11,6 +11,8 @@ use App\Http\Controllers\Public\SampleReportController;
 use App\Http\Controllers\Public\SeoController;
 use Illuminate\Support\Facades\Route;
 
+// Anonymous visitors get these pages from the page cache (App\Support\PageCache): no database connection needed.
+Route::middleware('page.cache')->group(function () {
 Route::get('/', HomeController::class)->name('home');
 
 Route::get('/packages', [PackageController::class, 'index'])->name('packages.index');
@@ -39,6 +41,7 @@ Route::get('/enquiries/thank-you', [EnquiryController::class, 'thanks'])->name('
 
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
+});
 
 // Admin authentication (no public registration).
 Route::middleware('guest')->group(function () {

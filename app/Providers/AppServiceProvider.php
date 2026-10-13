@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Faq;
 use App\Models\MediaOutlet;
 use App\Models\Package;
+use App\Models\PressRelease;
+use App\Models\SampleReport;
 use App\Services\SiteSettings;
 use App\Support\CatalogCache;
+use App\Support\PageCache;
 use App\View\Composers\AdminSidebarComposer;
 use App\View\Composers\FooterComposer;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -44,6 +48,11 @@ class AppServiceProvider extends ServiceProvider
         foreach ([Package::class, MediaOutlet::class] as $model) {
             $model::saved(fn () => CatalogCache::flush());
             $model::deleted(fn () => CatalogCache::flush());
+        }
+        // Any content change invalidates the public page cache.
+        foreach ([Package::class, MediaOutlet::class, PressRelease::class, Faq::class, SampleReport::class] as $model) {
+            $model::saved(fn () => PageCache::flush());
+            $model::deleted(fn () => PageCache::flush());
         }
 
         RateLimiter::for('enquiries', fn (Request $request) => [

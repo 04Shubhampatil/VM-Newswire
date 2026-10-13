@@ -105,5 +105,6 @@ class CatalogCache
         foreach (self::KEYS as $key) {
             Cache::forget($key);
         }
+        PageCache::flush();
     }
 }

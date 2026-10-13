@@ -134,6 +134,7 @@ class SiteSettings
     {
         Cache::forget(self::CACHE_KEY);
         $this->loaded = null;
+        \App\Support\PageCache::flush();
     }
 
     public function adminNotificationEmail(): ?string

@@ -1,7 +1,7 @@
 @props(['packages', 'brands'])
 {{--
     Packages comparison (Stitch Packages screen). Brand tabs are client-side (Alpine); rows are server-rendered so the
-    table works without JS. "Buy Now" opens the enquiry popover with the package pre-selected (fallback: /contact?package=).
+    table works without JS. "Enquire Now" opens the enquiry popover with the package pre-selected (fallback: /contact?package=).
     Desktop: the five-column table. Below lg: stacked cards with the same content.
 --}}
 @php
@@ -74,7 +74,7 @@
                         </td>
                         <td class="px-6 py-7 text-right align-top">
                             <a href="{{ route('contact', ['package' => $package->slug]) }}" @click.prevent="$dispatch('open-enquiry', {{ $package->id }})" aria-haspopup="dialog"
-                               class="{{ $buy }}" data-track="cta_click" data-track-label="Packages: Buy Now" data-track-package="{{ $package->name }}">Buy Now <x-icon name="arrow-right" :size="14" :stroke="2" /></a>
+                               class="{{ $buy }}" data-track="cta_click" data-track-label="Packages: Enquire Now" data-track-package="{{ $package->name }}">Enquire Now <x-icon name="arrow-right" :size="14" :stroke="2" /></a>
                         </td>
                     </tr>
                 @endforeach
@@ -108,7 +108,7 @@
                     @else
                         <span class="text-base font-bold text-ink">Price on request</span>
                     @endif
-                    <a href="{{ route('contact', ['package' => $package->slug]) }}" @click.prevent="$dispatch('open-enquiry', {{ $package->id }})" aria-haspopup="dialog" class="{{ $buy }} min-h-11">Buy Now <x-icon name="arrow-right" :size="14" :stroke="2" /></a>
+                    <a href="{{ route('contact', ['package' => $package->slug]) }}" @click.prevent="$dispatch('open-enquiry', {{ $package->id }})" aria-haspopup="dialog" class="{{ $buy }} min-h-11">Enquire Now <x-icon name="arrow-right" :size="14" :stroke="2" /></a>
                 </div>
             </article>
         @endforeach

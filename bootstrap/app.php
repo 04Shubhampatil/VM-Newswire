@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CachePublicPage;
 use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\SecurityHeaders;
@@ -26,7 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
             'password.changed' => EnsurePasswordIsChanged::class,
+            'page.cache' => CachePublicPage::class,
         ]);
+        // Public pages are served from the page cache, so the enquiry form's token may be stale. The endpoint
+        // is protected by the honeypot, rate limiting and optional Turnstile instead.
+        $middleware->validateCsrfTokens(except: ['enquiries']);
         // Global (not just the web group) so error pages and the health check carry the headers too.
         $middleware->append(SecurityHeaders::class);
         // Shared hosting / Cloudflare terminate TLS in front of PHP: trust the forwarded proto so
