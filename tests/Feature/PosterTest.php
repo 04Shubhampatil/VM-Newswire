@@ -131,6 +131,7 @@ class PosterTest extends TestCase
             ->assertSee('Fallback Outlet')
             ->assertSee(basename($posterPath), false)
             ->assertSee("open-outlet', 'ap-news'", false)
+            ->assertSee('package_url', false)
             ->assertSee("open-outlet', 'fallback-outlet'", false)
             ->assertDontSee("open-outlet', 'hidden-outlet'", false)
             ->assertDontSee('Hidden Outlet');

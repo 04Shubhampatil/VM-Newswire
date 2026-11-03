@@ -7,6 +7,15 @@
         <x-button :href="'mailto:'.$enquiry->email.'?subject='.rawurlencode('Re: your VM Newswire enquiry')" size="sm" icon-left="mail">Reply by email</x-button>
     </x-slot:actions>
 
+    @if ($enquiry->status === \App\Enums\EnquiryStatus::Spam)
+        <x-admin.alert type="warning" title="This enquiry is marked as spam.">
+            {{ $enquiry->spam_marked_by === 'admin' ? 'Marked by an admin' : ($enquiry->spam_marked_by === 'cleanup' ? 'Moved by the spam clean-up' : 'Detected automatically') }}{{ $enquiry->spam_marked_at ? ' on '.$enquiry->spam_marked_at->format('j M Y, H:i') : '' }}.
+            No emails were sent for it. Restore it to New if it is a real enquiry.
+        </x-admin.alert>
+    @elseif ($enquiry->needsSpamReview())
+        <x-admin.alert type="warning" title="Possible spam — please review.">Some spam signals matched (see “Spam check”). It was kept as a normal enquiry and emails were sent as usual.</x-admin.alert>
+    @endif
+
     @if ($failed)
         <x-admin.alert type="danger" title="{{ $failed }} email(s) failed to send.">Retry them below once the mail settings are fixed.</x-admin.alert>
     @endif
@@ -70,6 +79,38 @@
                         @endforeach
                     </select>
                     <button type="submit" class="btn btn-dark btn-sm shrink-0">Update</button>
+                </form>
+            </x-admin.panel>
+
+            <x-admin.panel title="Spam check">
+                <dl class="flex flex-col gap-3.5">
+                    <div><dt class="label-caps">Spam score</dt>
+                        <dd class="mt-0.5 text-[15px] font-medium text-heading">
+                            {{ $enquiry->spam_score ?? 'Not scored' }}@if ($enquiry->spam_score !== null)<span class="text-[13px] font-normal text-muted"> · spam at {{ config('spam.spam_threshold') }}+, review at {{ config('spam.review_threshold') }}+</span>@endif
+                        </dd>
+                    </div>
+                    @if ($enquiry->spam_reasons)
+                        <div><dt class="label-caps">Signals</dt>
+                            <dd class="mt-1">
+                                <ul class="flex flex-col gap-1 text-[13px] text-ink">
+                                    @foreach ($enquiry->spam_reasons as $reason)
+                                        <li class="flex justify-between gap-3"><span>{{ $reason['label'] ?? $reason['rule'] ?? '' }}</span><span class="shrink-0 font-semibold text-muted">+{{ $reason['points'] ?? 0 }}</span></li>
+                                    @endforeach
+                                </ul>
+                            </dd>
+                        </div>
+                    @endif
+                    <div><dt class="label-caps">IP address</dt><dd class="mt-0.5 font-mono text-[13px] text-ink">{{ $enquiry->ip_address ?: '—' }}</dd></div>
+                </dl>
+                <form method="POST" action="{{ route('admin.enquiries.status', $enquiry) }}">
+                    @csrf @method('PATCH')
+                    @if ($enquiry->status === \App\Enums\EnquiryStatus::Spam)
+                        <input type="hidden" name="status" value="new">
+                        <button type="submit" class="btn btn-secondary btn-sm">Restore to New</button>
+                    @else
+                        <input type="hidden" name="status" value="spam">
+                        <button type="submit" class="btn btn-secondary btn-sm" onclick="return confirm('Mark this enquiry as spam? It stays in the Spam tab and can be restored.')">Mark as spam</button>
+                    @endif
                 </form>
             </x-admin.panel>
 

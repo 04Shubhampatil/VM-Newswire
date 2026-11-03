@@ -29,14 +29,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'password.changed' => EnsurePasswordIsChanged::class,
             'page.cache' => CachePublicPage::class,
         ]);
-        // Public pages are served from the page cache, so the enquiry form's token may be stale. The endpoint
-        // is protected by the honeypot, rate limiting and optional Turnstile instead.
-        $middleware->validateCsrfTokens(except: ['enquiries']);
+        // The enquiry endpoint is CSRF-protected like every other POST. Cached pages carry a stale token, so the
+        // form fetches a fresh one from GET /enquiries/token (uncached) before submitting.
         // Global (not just the web group) so error pages and the health check carry the headers too.
         $middleware->append(SecurityHeaders::class);
-        // Shared hosting / Cloudflare terminate TLS in front of PHP: trust the forwarded proto so
-        // secure cookies, HSTS and https:// URLs work.
-        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_HOST | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO);
+        // Hostinger's CDN terminates TLS in front of PHP: trust only the forwarded proto/port so secure cookies,
+        // HSTS and https:// URLs work. X-Forwarded-For and X-Forwarded-Host are NOT trusted: LiteSpeed already
+        // puts the real visitor IP in REMOTE_ADDR, and the CDN passes a client-supplied X-Forwarded-For through,
+        // so trusting it let anyone fake their IP (bypassing the enquiry rate limit) or their host.
+        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('admin.dashboard'));
     })

@@ -6,6 +6,7 @@
         'new' => 'bg-teal-soft text-accent-ink',
         'contacted' => 'bg-[#e4eefb] text-[#1e4a8f]',
         'closed' => 'bg-canvas-deep text-muted',
+        'spam' => 'bg-danger-soft text-danger',
         'sent' => 'bg-success-soft text-success-ink',
         'pending' => 'bg-[#fff6d6] text-[#7a5b00]',
         'failed' => 'bg-danger-soft text-danger',

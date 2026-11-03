@@ -30,7 +30,7 @@
             </div>
             <div class="grid gap-5 md:grid-cols-2">
                 <x-admin.input name="hero_headline" label="Headline" :value="$settings->get('hero_headline')" maxlength="120" />
-                <x-admin.input name="hero_headline_highlight" label="Headline, second part" :value="$settings->get('hero_headline_highlight')" maxlength="120" help="Appended to the headline, e.g. “The News Starts” + “Here”." />
+                <x-admin.input name="hero_headline_highlight" label="Headline, second part" :value="$settings->get('hero_headline_highlight')" maxlength="120" help="Appended to the headline, e.g. “Your Announcement,” + “Published Everywhere”." />
             </div>
             <x-admin.textarea name="hero_text" label="Intro text" :value="$settings->get('hero_text')" rows="3" maxlength="400" />
             <div class="grid gap-5 md:grid-cols-2">
@@ -87,7 +87,7 @@
             <x-admin.input name="packages_text" label="Short description" :value="$settings->get('packages_text')" maxlength="300" />
         </x-admin.panel>
 
-        <x-admin.panel title="4 · Confidence cards" description="The “Deliver Your News with Confidence” section: heading, button and the quote cards. Three cards fit one row; up to six are allowed.">
+        <x-admin.panel title="4 · Confidence cards" description="The “What You Get with Every Release” section: heading, button and the quote cards. Three cards fit one row; up to six are allowed.">
             <div class="grid gap-5 md:grid-cols-[minmax(0,1fr)_240px]">
                 <x-admin.textarea name="confidence_heading" label="Heading" :value="$settings->get('confidence_heading')" rows="2" maxlength="160" help="A new line becomes a line break on desktop. Wrap a phrase in *asterisks* to colour it teal." />
                 <x-admin.input name="confidence_button_label" label="Button label" :value="$settings->get('confidence_button_label')" maxlength="40" help="Links to the sample reports page." />
@@ -162,7 +162,7 @@
             </div>
         </x-admin.panel>
 
-        <x-admin.panel title="6 · Journalists & media tools" description="The “Discover Your Next Story” block with the product screenshot.">
+        <x-admin.panel title="6 · Journalists & media tools" description="The “Find Releases Worth Covering” block with the product screenshot.">
             <div class="grid gap-5 md:grid-cols-2">
                 <x-admin.input name="journalists_eyebrow" label="Eyebrow" :value="$settings->get('journalists_eyebrow')" maxlength="80" />
                 <x-admin.input name="journalists_heading" label="Heading" :value="$settings->get('journalists_heading')" maxlength="120" />

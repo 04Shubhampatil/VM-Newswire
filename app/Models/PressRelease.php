@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Support\SafeHtml;
+use App\Support\SafeMarkdown;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -15,7 +17,7 @@ use Illuminate\Support\Str;
  * A blog post shown in the public Blogs section (/blogs). The table keeps its original
  * "press_releases" name from when the section was the Newsroom.
  */
-#[Fillable(['title', 'slug', 'category', 'author', 'excerpt', 'body', 'image_path', 'meta_title', 'meta_description', 'is_published', 'published_at'])]
+#[Fillable(['title', 'slug', 'category', 'author', 'excerpt', 'body', 'image_path', 'meta_title', 'meta_description', 'faqs', 'is_published', 'published_at'])]
 class PressRelease extends Model
 {
     /** @use HasFactory<PressReleaseFactory> */
@@ -28,9 +30,23 @@ class PressRelease extends Model
     protected function casts(): array
     {
         return [
+            'faqs' => 'array',
             'is_published' => 'boolean',
             'published_at' => 'datetime',
         ];
+    }
+
+    /**
+     * This post's own Q&A, with blank rows dropped.
+     *
+     * @return array<int, array{question: string, answer: string}>
+     */
+    public function faqList(): array
+    {
+        return array_values(array_filter(
+            array_map(fn ($row) => ['question' => trim((string) ($row['question'] ?? '')), 'answer' => trim((string) ($row['answer'] ?? ''))], $this->faqs ?? []),
+            fn ($row) => $row['question'] !== '' && $row['answer'] !== '',
+        ));
     }
 
     protected static function booted(): void
@@ -94,7 +110,34 @@ class PressRelease extends Model
     /** Short teaser for cards: the excerpt, or the first sentences of the body. */
     protected function teaser(): Attribute
     {
-        return Attribute::get(fn () => Str::limit(trim($this->excerpt ?: preg_replace('/[#*_>`\[\]]+/', '', (string) $this->body)), 150));
+        return Attribute::get(function () {
+            if (filled($this->excerpt)) {
+                return Str::limit(trim($this->excerpt), 150);
+            }
+            $text = $this->hasHtmlBody()
+                ? strip_tags(str_replace('>', '> ', (string) $this->rendered_body))
+                : preg_replace('/[#*_>`\[\]]+/', '', (string) $this->body);
+
+            return Str::limit(trim(preg_replace('/\s+/', ' ', html_entity_decode($text))), 150);
+        });
+    }
+
+    /** True when the body was saved by the visual editor (HTML) rather than written as Markdown. */
+    public function hasHtmlBody(): bool
+    {
+        return SafeHtml::looksLikeHtml($this->body);
+    }
+
+    /** The body as safe HTML for the public article page. */
+    protected function renderedBody(): Attribute
+    {
+        return Attribute::get(fn () => $this->hasHtmlBody() ? SafeHtml::render($this->body) : SafeMarkdown::render($this->body));
+    }
+
+    /** The body as HTML for the admin editor (older Markdown posts are converted on the way in). */
+    protected function editorHtml(): Attribute
+    {
+        return Attribute::get(fn () => (string) $this->rendered_body);
     }
 
     protected function authorName(): Attribute

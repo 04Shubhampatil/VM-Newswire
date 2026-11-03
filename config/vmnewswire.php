@@ -74,6 +74,24 @@ return [
     /*
     | Optional Cloudflare Turnstile. Leave both keys empty to disable.
     */
+    // Self-hosted ALTCHA "verify you are human" check on the enquiry form (see App\Support\Altcha).
+    // Replaced automatically by Google reCAPTCHA (RECAPTCHA_*) or Cloudflare Turnstile (TURNSTILE_*) when their keys are set.
+    'captcha' => [
+        'enabled' => (bool) env('CAPTCHA_ENABLED', true),
+        // "image" = picture of distorted characters to type (App\Support\ImageCaptcha); "altcha" = tick box.
+        'type' => env('CAPTCHA_TYPE', 'image'),
+        // Puzzle difficulty: higher is harder for bots and slower on old phones (100000 ≈ under a second).
+        'max_number' => (int) env('CAPTCHA_MAX_NUMBER', 100000),
+    ],
+
+    // Google reCAPTCHA v2 ("I'm not a robot" checkbox). Used when both keys are set, replacing Turnstile and
+    // the self-hosted check. Create keys (type "Challenge (v2)" → "I'm not a robot" checkbox, domain
+    // vmnewswire.com) at https://www.google.com/recaptcha/admin
+    'recaptcha' => [
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
+        'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+    ],
+
     'turnstile' => [
         'site_key' => env('TURNSTILE_SITE_KEY'),
         'secret_key' => env('TURNSTILE_SECRET_KEY'),

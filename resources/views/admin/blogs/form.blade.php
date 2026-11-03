@@ -19,7 +19,7 @@
                 <x-admin.panel title="Blog post">
                     <x-admin.input name="title" label="Title" :value="$release->title" required maxlength="200" />
                     <x-admin.textarea name="excerpt" label="Summary" :value="$release->excerpt" rows="3" maxlength="400" help="One or two sentences shown on the Blogs page and under the title. Optional: without it the start of the body is used." />
-                    <x-admin.textarea name="body" label="Body" :value="$release->body" rows="18" maxlength="60000" help="Use the toolbar for headings, bold, lists, quotes and links, or type Markdown directly. The eye icon previews the article." />
+                    <x-admin.textarea name="body" label="Body" :value="$release->body" rows="18" maxlength="60000" help="Use the toolbar for headings, bold, alignment, lists, quotes and links." />
                 </x-admin.panel>
 
                 <x-admin.panel title="Photo" description="Shown at the top of the article and on the Blogs page. 16:9 works best." :x-data="'posterPicker('.Js::from($imageUrl).')'">
@@ -67,53 +67,101 @@
             </x-admin.panel>
         </div>
 
+        @php
+            $faqRows = old('faqs', $release->faqs ?? []);
+            $faqRows = array_values(array_map(fn ($r) => ['question' => (string) ($r['question'] ?? ''), 'answer' => (string) ($r['answer'] ?? '')], is_array($faqRows) ? $faqRows : []));
+        @endphp
+        <div class="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+            <x-admin.panel title="FAQ for this post" description="Questions and answers shown under this article only. Leave empty to hide the FAQ section. Up to 10." x-data="{ rows: {{ Js::from($faqRows) }}, add() { if (this.rows.length < 10) this.rows.push({ question: '', answer: '' }) }, remove(i) { this.rows.splice(i, 1) } }">
+                <div class="flex flex-col gap-4">
+                    <template x-for="(row, i) in rows" :key="i">
+                        <div class="rounded-[10px] border border-line bg-canvas-deep/40 p-4">
+                            <div class="mb-3 flex items-center justify-between">
+                                <span class="text-[12px] font-semibold tracking-[0.08em] text-muted uppercase" x-text="'Question ' + (i + 1)"></span>
+                                <button type="button" @click="remove(i)" class="text-[12px] font-semibold text-danger hover:underline">Remove</button>
+                            </div>
+                            <label class="admin-label" :for="'faq-q-' + i">Question</label>
+                            <input type="text" :id="'faq-q-' + i" :name="'faqs[' + i + '][question]'" x-model="row.question" maxlength="200" class="admin-input" placeholder="e.g. How long should a press release be?">
+                            <label class="admin-label mt-3" :for="'faq-a-' + i">Answer</label>
+                            <textarea :id="'faq-a-' + i" :name="'faqs[' + i + '][answer]'" x-model="row.answer" rows="3" maxlength="1500" class="admin-input" placeholder="Short, plain-language answer."></textarea>
+                        </div>
+                    </template>
+                    <p class="text-[13px] text-muted" x-show="rows.length === 0">No questions yet. This post will not show a FAQ section.</p>
+                    <div>
+                        <button type="button" @click="add()" x-show="rows.length < 10" class="btn btn-secondary btn-sm"><x-icon name="plus" :size="14" /> Add question</button>
+                    </div>
+                    @error('faqs')<p class="text-xs text-danger">{{ $message }}</p>@enderror
+                    @foreach ($errors->get('faqs.*') as $messages)
+                        <p class="text-xs text-danger">{{ $messages[0] }}</p>
+                    @endforeach
+                </div>
+            </x-admin.panel>
+        </div>
+
         <x-admin.form-actions>
             <a href="{{ route('admin.blogs.index') }}" class="btn btn-secondary btn-sm">Cancel</a>
             <button type="submit" class="btn btn-primary btn-sm"><x-icon name="check" :size="15" />{{ $editing ? 'Save blog post' : 'Add blog post' }}</button>
         </x-admin.form-actions>
     </form>
 
-    {{-- Body editor: EasyMDE (Markdown with a toolbar and preview). Served from jsDelivr; the plain textarea still works without it. --}}
+    {{-- Body editor: Quill (visual editor with headings, bold, lists, quotes, links and text alignment).
+         The article is stored as HTML and sanitised on output by App\Support\SafeHtml. Older Markdown posts are
+         converted to HTML when opened. Served from jsDelivr; the plain textarea still works without it. --}}
     @push('head')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
         <style>
-            .EasyMDEContainer .CodeMirror { border: 1px solid var(--color-line); border-radius: 0 0 8px 8px; min-height: 420px; font-family: var(--font-sans); font-size: 15px; line-height: 1.65; color: var(--color-ink); }
-            .EasyMDEContainer .CodeMirror-focused { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgb(14 140 126 / .15); }
-            .EasyMDEContainer .editor-toolbar { border: 1px solid var(--color-line); border-bottom: 0; border-radius: 8px 8px 0 0; background: #f8fafc; opacity: 1; }
-            .EasyMDEContainer .editor-toolbar button { color: #334155; }
-            .EasyMDEContainer .editor-toolbar button.active, .EasyMDEContainer .editor-toolbar button:hover { background: #fff; border-color: var(--color-line); }
-            .EasyMDEContainer .editor-preview, .EasyMDEContainer .editor-preview-side { background: #fff; padding: 20px 24px; font-size: 15px; line-height: 1.7; color: #334155; }
-            .EasyMDEContainer .editor-preview h2, .EasyMDEContainer .editor-preview-side h2 { margin: 24px 0 8px; font-size: 22px; font-weight: 700; color: var(--color-heading); }
-            .EasyMDEContainer .editor-preview h3, .EasyMDEContainer .editor-preview-side h3 { margin: 20px 0 6px; font-size: 18px; font-weight: 700; color: var(--color-heading); }
-            .EasyMDEContainer .editor-preview p, .EasyMDEContainer .editor-preview-side p { margin: 0 0 14px; }
-            .EasyMDEContainer .editor-preview blockquote, .EasyMDEContainer .editor-preview-side blockquote { margin: 16px 0; padding: 12px 16px; border-left: 3px solid var(--color-accent); background: #f5f8fa; }
-            .EasyMDEContainer .editor-statusbar { color: var(--color-muted); font-size: 12px; }
+            #body-editor-wrap .ql-toolbar.ql-snow { border: 1px solid var(--color-line); border-radius: 8px 8px 0 0; background: #f8fafc; }
+            #body-editor-wrap .ql-container.ql-snow { border: 1px solid var(--color-line); border-top: 0; border-radius: 0 0 8px 8px; background: #fff; font-family: var(--font-sans); font-size: 15px; }
+            #body-editor { min-height: 480px; }
+            #body-editor .ql-editor { min-height: 480px; padding: 20px 24px; line-height: 1.7; color: #334155; }
+            #body-editor .ql-editor h2 { margin: 24px 0 8px; font-size: 19px; font-weight: 700; color: var(--color-heading); }
+            #body-editor .ql-editor h3 { margin: 20px 0 6px; font-size: 17px; font-weight: 700; color: var(--color-heading); }
+            #body-editor .ql-editor p { margin: 0 0 14px; }
+            #body-editor .ql-editor blockquote { margin: 16px 0; padding: 12px 16px; border-left: 3px solid var(--color-accent); background: #f5f8fa; }
+            #body-editor .ql-editor strong { font-weight: 600; color: var(--color-heading); }
+            #body-editor .ql-editor.ql-blank::before { color: #94a3b8; font-style: normal; left: 24px; }
+            .body-editor-active #f-body { display: none; }
         </style>
     @endpush
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js" defer></script>
         <script>
             window.addEventListener('DOMContentLoaded', function () {
                 var textarea = document.getElementById('f-body');
-                if (! textarea || typeof EasyMDE === 'undefined') return;
-                new EasyMDE({
-                    element: textarea,
-                    autoDownloadFontAwesome: true,
-                    spellChecker: false,
-                    minHeight: '420px',
-                    placeholder: 'Write the article here. Use the toolbar for headings, bold text, lists, quotes and links.',
-                    status: ['words'],
-                    toolbar: [
-                        'bold', 'italic', '|',
-                        { name: 'heading-2', action: EasyMDE.toggleHeading2, className: 'fa fa-header', title: 'Section heading' },
-                        { name: 'heading-3', action: EasyMDE.toggleHeading3, className: 'fa fa-header fa-header-x fa-header-3', title: 'Sub-heading' }, '|',
-                        'quote', 'unordered-list', 'ordered-list', '|',
-                        'link', 'horizontal-rule', '|',
-                        'preview', 'side-by-side', 'fullscreen', '|',
-                        'undo', 'redo', '|', 'guide'
-                    ],
-                    renderingConfig: { singleLineBreaks: false },
+                if (! textarea || typeof Quill === 'undefined') return;
+
+                var wrap = document.createElement('div');
+                wrap.id = 'body-editor-wrap';
+                var mount = document.createElement('div');
+                mount.id = 'body-editor';
+                wrap.appendChild(mount);
+                textarea.parentNode.insertBefore(wrap, textarea.nextSibling);
+                textarea.parentNode.classList.add('body-editor-active');
+
+                var quill = new Quill(mount, {
+                    theme: 'snow',
+                    placeholder: 'Write the article here. Use the toolbar for headings, bold text, alignment, lists, quotes and links.',
+                    modules: {
+                        toolbar: [
+                            [{ header: [2, 3, false] }],
+                            ['bold', 'italic', 'underline'],
+                            [{ align: '' }, { align: 'center' }, { align: 'right' }, { align: 'justify' }],
+                            [{ list: 'ordered' }, { list: 'bullet' }],
+                            ['blockquote', 'link'],
+                            ['clean'],
+                        ],
+                    },
                 });
+
+                // Existing content (HTML; older Markdown posts arrive already converted).
+                var initial = @json(old('body') !== null ? (string) old('body') : ($release->exists ? (string) $release->editor_html : ''));
+                if (initial) quill.clipboard.dangerouslyPasteHTML(initial, 'silent');
+
+                // Keep the hidden textarea in sync so the HTML is what gets submitted.
+                // Quill's semantic export turns ordinary spaces into &nbsp;, so they are restored here.
+                var sync = function () { textarea.value = quill.getText().trim() ? quill.getSemanticHTML().replace(/&nbsp;/g, ' ') : ''; };
+                quill.on('text-change', sync);
+                textarea.form.addEventListener('submit', sync);
             });
         </script>
     @endpush

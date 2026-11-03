@@ -21,7 +21,7 @@ class MediaNetworkController extends Controller
         $outlets = MediaOutlet::active()
             ->when($filters['category'] ?? null, fn ($q, $category) => $q->where('category', $category))
             ->when($filters['q'] ?? null, fn ($q, $term) => $q->where('name', 'like', '%'.addcslashes($term, '%_\\').'%'))
-            ->with(['packages' => fn ($q) => $q->active()->ordered()->select('packages.id', 'packages.name', 'packages.slug')])
+            ->with(['packages' => fn ($q) => $q->active()->ordered()->select('packages.id', 'packages.name', 'packages.slug', 'packages.brand', 'packages.is_highlighted')])
             ->orderByDesc('is_highlighted')
             ->ordered()
             ->paginate(24)

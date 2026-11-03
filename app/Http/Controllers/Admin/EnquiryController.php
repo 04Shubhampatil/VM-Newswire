@@ -34,6 +34,7 @@ class EnquiryController extends Controller
             'sort' => $sort,
             'direction' => $direction,
             'statusCounts' => Enquiry::query()->select('status')->selectRaw('count(*) as total')->groupBy('status')->pluck('total', 'status'),
+            'reviewCount' => Enquiry::query()->needsSpamReview()->count(),
             'packages' => Package::withTrashed()->ordered()->get(['id', 'name']),
         ]);
     }
@@ -46,9 +47,48 @@ class EnquiryController extends Controller
     public function updateStatus(Request $request, Enquiry $enquiry): RedirectResponse
     {
         $data = $request->validate(['status' => ['required', Rule::enum(EnquiryStatus::class)]]);
-        $enquiry->update($data);
+        $status = EnquiryStatus::from($data['status']);
+
+        if ($status === EnquiryStatus::Spam) {
+            $enquiry->markAsSpam('admin');
+        } elseif ($enquiry->status === EnquiryStatus::Spam) {
+            $enquiry->restoreFromSpam();
+            $enquiry->update(['status' => $status]);
+        } else {
+            $enquiry->update(['status' => $status]);
+        }
 
         return back()->with('toast', 'Enquiry status updated to '.$enquiry->status->label().'.');
+    }
+
+    /**
+     * Bulk actions from the list: mark selected enquiries as Spam, or restore selected spam to New.
+     * Never deletes anything.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'bulk_action' => ['required', Rule::in(['spam', 'restore'])],
+            'ids' => ['required', 'array', 'min:1', 'max:500'],
+            'ids.*' => ['integer'],
+        ], ['ids.required' => 'Select at least one enquiry first.']);
+
+        $enquiries = Enquiry::whereKey($data['ids'])->get();
+        $changed = 0;
+
+        foreach ($enquiries as $enquiry) {
+            if ($data['bulk_action'] === 'spam' && $enquiry->status !== EnquiryStatus::Spam) {
+                $enquiry->markAsSpam('admin');
+                $changed++;
+            } elseif ($data['bulk_action'] === 'restore' && $enquiry->status === EnquiryStatus::Spam) {
+                $enquiry->restoreFromSpam();
+                $changed++;
+            }
+        }
+
+        return back()->with('toast', $data['bulk_action'] === 'spam'
+            ? "{$changed} enquir".($changed === 1 ? 'y' : 'ies').' marked as spam.'
+            : "{$changed} enquir".($changed === 1 ? 'y' : 'ies').' restored to New.');
     }
 
     public function retryEmails(Enquiry $enquiry, EnquiryService $service): RedirectResponse
@@ -95,13 +135,14 @@ class EnquiryController extends Controller
     }
 
     /**
-     * @return array{search: ?string, status: ?string, package: ?string, from: ?string, to: ?string}
+     * @return array{search: ?string, status: ?string, flag: ?string, package: ?string, from: ?string, to: ?string}
      */
     private function filters(Request $request): array
     {
         $data = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', Rule::enum(EnquiryStatus::class)],
+            'flag' => ['nullable', Rule::in(['review'])],
             'package' => ['nullable', 'string', 'max:20'],
             'from' => ['nullable', 'date'],
             'to' => ['nullable', 'date', 'after_or_equal:from'],
@@ -110,6 +151,7 @@ class EnquiryController extends Controller
         return [
             'search' => $data['search'] ?? null,
             'status' => $data['status'] ?? null,
+            'flag' => $data['flag'] ?? null,
             'package' => $data['package'] ?? null,
             'from' => $data['from'] ?? null,
             'to' => $data['to'] ?? null,

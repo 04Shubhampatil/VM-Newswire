@@ -1237,8 +1237,8 @@ body.site-admin {
 .bl-figure img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:4px;background:#eef2f6}
 .bl-body{max-width:720px;margin-top:28px;font-size:16px;line-height:1.75;color:#475569}
 .bl-body p{margin:0 0 18px}
-.bl-body h2{margin:30px 0 10px;font-family:Georgia,"Times New Roman",serif;font-size:22px;line-height:1.25;font-weight:700;color:#0b1628}
-.bl-body h3{margin:26px 0 8px;font-family:Georgia,"Times New Roman",serif;font-size:19px;line-height:1.3;font-weight:700;color:#0b1628}
+.bl-body h2{margin:28px 0 8px;font-family:Georgia,"Times New Roman",serif;font-size:19px;line-height:1.3;font-weight:700;color:#0b1628}
+.bl-body h3{margin:22px 0 6px;font-family:Georgia,"Times New Roman",serif;font-size:17px;line-height:1.35;font-weight:700;color:#0b1628}
 .bl-body h2:first-child,.bl-body h3:first-child{margin-top:0}
 .bl-body ul,.bl-body ol{margin:0 0 18px;padding-left:22px}
 .bl-body ul{list-style:disc}.bl-body ol{list-style:decimal}
@@ -1310,3 +1310,15 @@ body.site-admin {
 .pk-report>div{flex:1 1 200px;min-width:0}
 .pk-report-title{margin:0;font-size:15px;font-weight:600;color:var(--color-heading)}
 .pk-report-meta{margin:3px 0 0;font-size:13px;color:var(--color-muted)}
+
+/* Enquiry form: ALTCHA "I'm not a robot" check, styled like the form fields */
+.enq-captcha altcha-widget{display:block;--altcha-max-width:100%;--altcha-border-width:1px;--altcha-border-radius:10px;--altcha-color-base:#fff;--altcha-color-border:var(--color-line,#dbe3ec);--altcha-color-text:var(--color-heading,#0b1628);--altcha-color-border-focus:#0f9f91;--altcha-color-error-text:#c2410c;--altcha-color-footer-bg:#f8fafc;font-family:inherit;font-size:14px}
+.enq-captcha altcha-widget input[type=checkbox]{accent-color:#0f9f91}
+.enq-form .enq-captcha altcha-widget{--altcha-border-radius:8px;font-size:13px}
+
+/* Enquiry form: picture captcha (image + "Reload image", then the answer box) */
+.enq-image-captcha .enq-captcha-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:10px}
+.enq-image-captcha .enq-captcha-img{display:block;width:200px;height:64px;border:1px solid var(--color-line,#dbe3ec);border-radius:8px;background:#e8ecf2;user-select:none}
+.enq-image-captcha .enq-captcha-reload{display:inline-flex;align-items:center;gap:6px;padding:4px 2px;border:0;background:none;font-size:13px;font-weight:600;color:#c2410c;cursor:pointer}
+.enq-image-captcha .enq-captcha-reload:hover{text-decoration:underline}
+.enq-image-captcha input[name=captcha]{max-width:260px;letter-spacing:.06em}

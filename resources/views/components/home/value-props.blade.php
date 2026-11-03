@@ -6,10 +6,10 @@
 @php
     $network = (string) $site->get('network_size_label');
     $items = [
-        ['art' => 'readers', 'title' => 'Reach The Right Readers', 'text' => "Choose the publication categories your announcement belongs to — business, finance, technology, markets and news — across {$network} media outlets.", 'cta' => 'See Distribution Packages', 'url' => route('packages.index')],
-        ['art' => 'multimedia', 'title' => 'Show & Tell Your News', 'text' => 'Every package lists its headline platforms and extended network up front, so you know exactly where your story will appear.', 'cta' => 'View the Media Network', 'url' => route('media-network')],
-        ['art' => 'financial', 'title' => 'Deliver Accurate & Reliable Financial News', 'text' => 'Put company and market announcements in front of finance and markets publications in the network, with a named contact confirming every detail.', 'cta' => 'Explore Finance Outlets', 'url' => route('media-network', ['category' => 'Finance'])],
-        ['art' => 'analytics', 'title' => 'Optimize with Analytics & Reporting', 'text' => 'Receive a distribution report with every placement and live link, ready to share with clients and stakeholders.', 'cta' => 'Learn About Our Reports', 'url' => route('sample-reports.index')],
+        ['art' => 'readers', 'title' => 'Pick a Package, Not a Guess', 'text' => "Every package shows its price, its headline platforms and the full outlet list before you order — no quotes, no hidden add-ons, {$network} outlets to choose from.", 'cta' => 'Compare Packages', 'url' => route('packages.index')],
+        ['art' => 'multimedia', 'title' => 'Know Where Your Story Lands', 'text' => 'Browse the complete media network by category and open any outlet to see which package carries it. What you see is what gets published.', 'cta' => 'Browse the Media Network', 'url' => route('media-network')],
+        ['art' => 'financial', 'title' => 'Built for Market-Sensitive News', 'text' => 'Earnings, listings, funding rounds and investor updates go to finance and markets publications first, with a real person checking every release before it goes out.', 'cta' => 'See Finance Outlets', 'url' => route('media-network', ['category' => 'Finance'])],
+        ['art' => 'analytics', 'title' => 'Proof in Your Inbox', 'text' => 'After distribution you get a placement report with a live link for every outlet — the same report you can download as a sample before you buy.', 'cta' => 'Download a Sample Report', 'url' => route('sample-reports.index')],
     ];
 @endphp
 <section class="bg-white pb-16 lg:pb-20">
@@ -18,11 +18,11 @@
             <div class="grid gap-6 lg:grid-cols-2 lg:gap-16" data-reveal-group>
                 <div data-reveal>
                     <span class="accent-bar"></span>
-                    <h2 class="home-h2 mt-5">Turn Your News into <br class="hidden sm:block">Headlines</h2>
+                    <h2 class="home-h2 mt-5">Distribution You Can <br class="hidden sm:block">See Before You Pay</h2>
                 </div>
                 <p class="text-[16px] leading-[1.7] text-muted lg:pt-6" data-reveal>
-                    Earn more coverage and extend your reach with a press release distribution service built on transparent packages.
-                    Send one release and reach the news platforms, business publications and digital media outlets your audience already follows.
+                    Most newswires hide the outlet list until after you order. We publish ours up front — fixed-price packages, the exact platforms
+                    each one reaches, and a sample report showing what you will receive once your release is live.
                 </p>
             </div>
 

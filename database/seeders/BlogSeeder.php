@@ -40,6 +40,8 @@ class BlogSeeder extends Seeder
 
         $images = ['images/package-story.webp', 'images/media-network-hero.webp', 'images/hero-skyline.webp'];
 
+        $faqs = $this->faqs();
+
         foreach ($this->posts() as $i => [$title, $category, $daysAgo, $excerpt, $body]) {
             PressRelease::create([
                 'title' => $title,
@@ -47,11 +49,53 @@ class BlogSeeder extends Seeder
                 'author' => 'VM Newswire Editorial Team',
                 'excerpt' => $excerpt,
                 'body' => $body,
+                'faqs' => $faqs[$title] ?? null,
                 'image_path' => $images[$i % count($images)],
                 'is_published' => true,
                 'published_at' => now()->subDays($daysAgo)->setTime(9, 30),
             ]);
         }
+    }
+
+    /**
+     * Per-post Q&A keyed by post title. Editable later in Admin → Blogs.
+     *
+     * @return array<string, array<int, array{question: string, answer: string}>>
+     */
+    private function faqs(): array
+    {
+        return [
+            'How to Write a Press Release That Gets Noticed' => [
+                ['question' => 'How long should a press release be?', 'answer' => 'Most releases land between 300 and 600 words. Put the news in the first paragraph and keep the rest to supporting detail, a quote and a short boilerplate.'],
+                ['question' => 'Do I need a quote in my press release?', 'answer' => 'Yes, where possible. One or two quotes from a named person give journalists something they can lift directly, and they make the story feel real rather than corporate.'],
+                ['question' => 'Should I include a headline and a sub-headline?', 'answer' => 'A headline is essential. A one-line sub-headline is optional but useful for adding the key number or benefit that would not fit in the headline.'],
+            ],
+            'The Role of Data in Modern Press Releases' => [
+                ['question' => 'How many statistics should a press release include?', 'answer' => 'Two or three strong, sourced figures are better than a dozen. Choose the numbers that prove the headline and leave the rest for a linked report.'],
+                ['question' => 'Do I have to cite the source of my data?', 'answer' => 'Always. Name the study, survey or internal report and the period it covers. Unsourced numbers are the first thing an editor will cut.'],
+                ['question' => 'Can I include a chart or table in the release?', 'answer' => 'Keep the release itself text-based so every outlet can carry it. Link to a chart or a downloadable PDF instead.'],
+            ],
+            'How to Build Stronger Media Relationships' => [
+                ['question' => 'How do I find the right journalist to contact?', 'answer' => 'Read what they have published in the last month. If your story would sit naturally next to those pieces, they are the right contact. If not, keep looking.'],
+                ['question' => 'How often should I follow up after sending a story?', 'answer' => 'Once, two or three working days later, and only if you have something to add. Repeated chasers damage the relationship more than silence does.'],
+                ['question' => 'Does a distribution service replace personal outreach?', 'answer' => 'No. Distribution puts your release in front of many outlets at once; personal outreach wins the handful of in-depth stories. Use both.'],
+            ],
+            'Common Mistakes to Avoid in Your Press Release' => [
+                ['question' => 'Is it a mistake to send a press release on a Friday?', 'answer' => 'Usually. Newsrooms are thinly staffed and readers are switching off. Tuesday to Thursday mornings get the best pick-up for most business news.'],
+                ['question' => 'Can I send the same release to several newswires?', 'answer' => 'You can, but duplicate copies on the same outlets look spammy and can hurt search ranking. Pick one package that covers the outlets you need.'],
+                ['question' => 'What happens if I spot an error after distribution?', 'answer' => 'Contact us straight away. Small corrections can usually be applied to the live versions; a material error may need a short correction release.'],
+            ],
+            'Why Timing Matters in Media Outreach' => [
+                ['question' => 'What is the best time of day to send a press release?', 'answer' => 'Early morning in the time zone of your main audience, typically between 8 and 10 am, so it is in the inbox before editorial meetings.'],
+                ['question' => 'Should I avoid sending news during major events?', 'answer' => 'Yes, unless your story is about the event. Budget announcements, elections and big product launches crowd out everything else for a day or two.'],
+                ['question' => 'Can I schedule a release for a specific time?', 'answer' => 'Yes. Tell us the date and time when you enquire and we will hold the release until then.'],
+            ],
+            'Reading Your Distribution Report: What the Numbers Mean' => [
+                ['question' => 'What is included in a distribution report?', 'answer' => 'A list of every outlet that published the release, a live link to each placement and the date it went live. Sample reports are available before you buy.'],
+                ['question' => 'When will I receive my report?', 'answer' => 'Normally within one to two working days of distribution, once all placements are live and verified.'],
+                ['question' => 'Why do some links show a different headline?', 'answer' => 'A few outlets reformat headlines to fit their house style. The body of the release is carried as submitted.'],
+            ],
+        ];
     }
 
     /**

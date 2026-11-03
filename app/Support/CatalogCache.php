@@ -26,7 +26,7 @@ class CatalogCache
     public static function menuPackages(): Collection
     {
         try {
-            $rows = Cache::remember('catalog.menu_packages', 3600, fn () => Package::active()->where('show_in_menu', true)->ordered()
+            $rows = Cache::remember('catalog.menu_packages', self::ttl(), fn () => Package::active()->where('show_in_menu', true)->ordered()
                 ->get(['id', 'name', 'slug'])->map->only(['id', 'name', 'slug'])->all());
         } catch (Throwable) {
             $rows = [];
@@ -41,7 +41,7 @@ class CatalogCache
     public static function footerPackages(): Collection
     {
         try {
-            $rows = Cache::remember('catalog.footer_packages', 3600, fn () => Package::active()->ordered()->limit(8)
+            $rows = Cache::remember('catalog.footer_packages', self::ttl(), fn () => Package::active()->ordered()->limit(8)
                 ->get(['id', 'name', 'slug'])->map->only(['id', 'name', 'slug'])->all());
         } catch (Throwable) {
             $rows = [];
@@ -57,7 +57,7 @@ class CatalogCache
      */
     public static function mediaSummary(): Collection
     {
-        return collect(Cache::remember('catalog.media_summary', 3600, function () {
+        return collect(Cache::remember('catalog.media_summary', self::ttl(), function () {
             $counts = MediaOutlet::active()->toBase()
                 ->selectRaw('category, count(*) as total')
                 ->groupBy('category')
@@ -91,13 +91,19 @@ class CatalogCache
      */
     public static function highlightedOutlets(): Collection
     {
-        $rows = Cache::remember('catalog.highlighted_outlets', 3600, fn () => MediaOutlet::active()
+        $rows = Cache::remember('catalog.highlighted_outlets', self::ttl(), fn () => MediaOutlet::active()
             ->where('is_highlighted', true)
             ->orderByRaw('CASE WHEN homepage_order IS NULL THEN 1 ELSE 0 END')
             ->orderBy('homepage_order')->orderBy('name')
             ->get()->map->toPosterArray()->all());
 
         return collect($rows)->map(fn (array $row) => (object) $row);
+    }
+
+    /** Production keeps catalogue reads for an hour; development only for a few seconds so admin edits show at once. */
+    private static function ttl(): int
+    {
+        return config('app.debug') ? 5 : 3600;
     }
 
     public static function flush(): void

@@ -46,7 +46,7 @@
                         </figure>
                     @endif
 
-                    <div class="bl-body">{{ SafeMarkdown::render($post->body) }}</div>
+                    <div class="bl-body">{{ $post->rendered_body }}</div>
 
                     <footer class="bl-article-foot">
                         <div class="bl-share">
@@ -67,26 +67,25 @@
                         <a href="{{ route('contact') }}#enquire" x-data @click="if (document.getElementById('enquiry-modal-title')) { $event.preventDefault(); $dispatch('open-enquiry'); }" class="bl-btn">Enquire now <x-icon name="arrow-right" :size="14" :stroke="2.4" /></a>
                     </div>
 
-                    @if ($faqs->isNotEmpty())
+                    @if ($faqs !== [])
                         <section class="bl-faq" aria-labelledby="post-faq">
                             <span class="bl-eyebrow">FAQ</span>
                             <h2 id="post-faq" class="bl-faq-title">Frequently asked questions</h2>
                             <div class="pk-acc">
-                                @foreach ($faqs as $faq)
+                                @foreach ($faqs as $i => $faq)
                                     <div class="pk-acc-item" x-data="{ open: {{ $loop->first ? 'true' : 'false' }} }">
                                         <h3>
-                                            <button type="button" class="pk-acc-btn bl-acc-btn" @click="open = !open" :aria-expanded="open.toString()" aria-controls="post-faq-{{ $faq->id }}">
-                                                <span>{{ $faq->question }}</span>
+                                            <button type="button" class="pk-acc-btn bl-acc-btn" @click="open = !open" :aria-expanded="open.toString()" aria-controls="post-faq-{{ $i }}">
+                                                <span>{{ $faq['question'] }}</span>
                                                 <x-icon name="plus" :size="18" :stroke="2" class="pk-acc-icon" />
                                             </button>
                                         </h3>
-                                        <div id="post-faq-{{ $faq->id }}" x-show="open" x-collapse @unless ($loop->first) x-cloak @endunless>
-                                            <div class="pk-acc-body">{{ $faq->answer }}</div>
+                                        <div id="post-faq-{{ $i }}" x-show="open" x-collapse @unless ($loop->first) x-cloak @endunless>
+                                            <div class="pk-acc-body">{!! nl2br(e($faq['answer'])) !!}</div>
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
-                            <a href="{{ route('faq') }}" class="bl-link" style="margin-top:16px">All FAQs <x-icon name="arrow-right" :size="14" :stroke="2.2" /></a>
                         </section>
                     @endif
                 </article>

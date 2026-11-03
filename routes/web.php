@@ -36,6 +36,9 @@ Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 
+Route::get('/enquiries/captcha/{form}', [EnquiryController::class, 'captcha'])->middleware('throttle:60,1')->where('form', '[a-z]{1,12}')->name('enquiries.captcha');
+Route::get('/enquiries/challenge', [EnquiryController::class, 'challenge'])->middleware('throttle:30,1')->name('enquiries.challenge');
+Route::get('/enquiries/token', [EnquiryController::class, 'token'])->middleware('throttle:30,1')->name('enquiries.token');
 Route::post('/enquiries', [EnquiryController::class, 'store'])->middleware('throttle:enquiries')->name('enquiries.store');
 Route::get('/enquiries/thank-you', [EnquiryController::class, 'thanks'])->name('enquiries.thanks');
 

@@ -4,11 +4,11 @@
 --}}
 @php
     $solutions = [
-        ['art' => 'pr', 'label' => "PR & Corporate\nCommunications", 'url' => route('packages.index')],
-        ['art' => 'ir', 'label' => 'IR Professionals', 'url' => route('media-network', ['category' => 'Finance'])],
-        ['art' => 'agencies', 'label' => 'Agencies', 'url' => route('contact')],
-        ['art' => 'companies', 'label' => 'Public Companies', 'url' => route('media-network', ['category' => 'Markets'])],
-        ['art' => 'industry', 'label' => "Industry-Specific\nSolutions", 'url' => route('media-network')],
+        ['art' => 'pr', 'label' => "Product Launches\n& Company News", 'url' => route('packages.index')],
+        ['art' => 'ir', 'label' => "Earnings &\nInvestor Updates", 'url' => route('media-network', ['category' => 'Finance'])],
+        ['art' => 'agencies', 'label' => "PR Agencies &\nResellers", 'url' => route('contact')],
+        ['art' => 'companies', 'label' => "Listed &\nPre-IPO Companies", 'url' => route('media-network', ['category' => 'Markets'])],
+        ['art' => 'industry', 'label' => "Startups &\nGrowing Brands", 'url' => route('media-network')],
     ];
 @endphp
 <section id="solutions" class="border-t border-line bg-white py-16 lg:py-24">
@@ -16,11 +16,11 @@
         <div class="grid gap-6 lg:grid-cols-2 lg:gap-16" data-reveal-group>
             <div data-reveal>
                 <span class="accent-bar"></span>
-                <h2 class="home-h2 mt-5">Get Results with the <br class="hidden sm:block">Solutions You Need</h2>
+                <h2 class="home-h2 mt-5">One Newswire for <br class="hidden sm:block">Every Kind of Announcement</h2>
             </div>
             <p class="text-[16px] leading-[1.7] text-muted lg:pt-6" data-reveal>
-                {{ $site->get('company_name') }} helps PR teams, agencies, investor relations professionals and businesses of all sizes
-                reach the right audiences and give their announcements the visibility they deserve.
+                Whether it is a first product launch or a quarterly results release, {{ $site->get('company_name') }} has a package sized for it.
+                Pick the audience closest to your news and we will show you the outlets and packages that fit.
             </p>
         </div>
 

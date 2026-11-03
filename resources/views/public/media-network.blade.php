@@ -92,7 +92,7 @@
             @else
                 <ul class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group>
                     @foreach ($outlets as $outlet)
-                        @php $primaryPackage = $outlet->packages->first(); @endphp
+                        @php $primaryPackage = $outlet->primaryPackage($outlet->packages); @endphp
                         <li data-reveal>
                             {{-- The whole card opens the outlet's first (primary) package page. --}}
                             <{{ $primaryPackage ? 'a' : 'article' }} @if ($primaryPackage) href="{{ route('packages.show', $primaryPackage->slug) }}" aria-label="{{ $outlet->name }}: view the {{ $primaryPackage->name }} package" @endif

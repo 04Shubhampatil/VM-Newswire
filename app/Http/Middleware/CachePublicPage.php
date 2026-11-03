@@ -57,6 +57,10 @@ class CachePublicPage
 
     private function cacheable(Request $request): bool
     {
+        // Development (APP_DEBUG=true) always renders fresh, so code and content edits show immediately.
+        if (config('app.debug') && ! app()->runningUnitTests()) {
+            return false;
+        }
         if (! $request->isMethod('GET') || $request->ajax() || $request->wantsJson()) {
             return false;
         }

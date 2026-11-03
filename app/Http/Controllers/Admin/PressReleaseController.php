@@ -104,6 +104,9 @@ class PressReleaseController extends Controller
             'body' => ['required', 'string', 'max:60000'],
             'meta_title' => ['nullable', 'string', 'max:120'],
             'meta_description' => ['nullable', 'string', 'max:320'],
+            'faqs' => ['nullable', 'array', 'max:10'],
+            'faqs.*.question' => ['nullable', 'string', 'max:200'],
+            'faqs.*.answer' => ['nullable', 'string', 'max:1500'],
             'published_at' => ['nullable', 'date'],
             'is_published' => ['boolean'],
             'image' => ['nullable', 'file', 'max:'.config('vmnewswire.posters.max_kb')],
@@ -111,6 +114,13 @@ class PressReleaseController extends Controller
         ]);
 
         $data['is_published'] = $request->boolean('is_published');
+        // Keep only rows with both a question and an answer; store null when there are none.
+        $faqs = collect($data['faqs'] ?? [])
+            ->map(fn ($row) => ['question' => trim((string) ($row['question'] ?? '')), 'answer' => trim((string) ($row['answer'] ?? ''))])
+            ->filter(fn ($row) => $row['question'] !== '' && $row['answer'] !== '')
+            ->values()
+            ->all();
+        $data['faqs'] = $faqs ?: null;
         unset($data['slug'], $data['image'], $data['remove_image']);
 
         return $data;

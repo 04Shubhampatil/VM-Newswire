@@ -111,11 +111,15 @@ class EnquiryTest extends TestCase
             ->assertJsonValidationErrors(['email', 'name']);
     }
 
-    public function test_in_page_honeypot_submission_reports_success_but_stores_nothing(): void
+    public function test_in_page_honeypot_submission_reports_success_and_is_kept_as_spam(): void
     {
+        Queue::fake();
+
         $this->postJson('/enquiries', $this->payload(['website' => 'spam']))->assertCreated();
 
-        $this->assertDatabaseCount('enquiries', 0);
+        // Never silently dropped: saved with status Spam, no emails.
+        $this->assertSame(\App\Enums\EnquiryStatus::Spam, Enquiry::sole()->status);
+        Queue::assertNothingPushed();
     }
 
     public function test_package_enquiry_stores_package_and_price_snapshot(): void
@@ -149,14 +153,17 @@ class EnquiryTest extends TestCase
         $this->post('/enquiries', $this->payload(['package_id' => $package->id]))->assertSessionHasErrors('package_id');
     }
 
-    public function test_honeypot_submissions_are_discarded_silently(): void
+    public function test_honeypot_submissions_are_kept_as_spam_without_emails(): void
     {
         Queue::fake();
 
         $this->post('/enquiries', $this->payload(['website' => 'http://spam.example']))
             ->assertRedirect(route('enquiries.thanks'));
 
-        $this->assertDatabaseCount('enquiries', 0);
+        $enquiry = Enquiry::sole();
+        $this->assertSame(\App\Enums\EnquiryStatus::Spam, $enquiry->status);
+        $this->assertSame('auto', $enquiry->spam_marked_by);
+        $this->assertSame(0, $enquiry->emailLogs()->count());
         Queue::assertNothingPushed();
     }
 

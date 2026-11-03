@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -97,9 +98,39 @@ class MediaOutlet extends Model
      *
      * @return array{id: int, name: string, slug: string, category: string, short_description: ?string, description: ?string, poster_src: ?string, poster_width: ?int, poster_height: ?int, website_url: ?string}
      */
+    /**
+     * The package an outlet card links to, chosen from the outlet's active packages (given in display order):
+     * a package whose brand or name is the outlet itself (e.g. "Benzinga" → "Benzinga Markets Reach") wins,
+     * then the "Most popular" package, then the first in display order.
+     *
+     * @param  \Illuminate\Support\Collection<int, Package>  $packages
+     */
+    public function primaryPackage(Collection $packages): ?Package
+    {
+        $outlet = mb_strtolower(trim($this->name));
+        $compact = str_replace(' ', '', $outlet);
+
+        return $packages->sortBy(function (Package $package, int $index) use ($outlet, $compact) {
+            $brand = mb_strtolower((string) $package->brand);
+            $name = mb_strtolower($package->name);
+            $rank = match (true) {
+                $brand !== '' && ($brand === $outlet || str_replace(' ', '', $brand) === $compact) => 0,
+                str_contains($name, $outlet) || str_contains(str_replace(' ', '', $name), $compact) => 1,
+                (bool) $package->is_highlighted => 2,
+                default => 3,
+            };
+
+            return sprintf('%d-%05d', $rank, $index);
+        })->first();
+    }
+
     public function toPosterArray(): array
     {
+        $package = $this->primaryPackage($this->packages()->active()->ordered()->get(['packages.id', 'packages.name', 'packages.slug', 'packages.brand', 'packages.is_highlighted']));
+
         return [
+            'package_name' => $package?->name,
+            'package_url' => $package ? route('packages.show', $package->slug) : null,
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,

@@ -47,7 +47,7 @@ class AdminContentTest extends TestCase
     public function test_home_page_copy_is_editable_from_website_content(): void
     {
         MediaOutlet::factory()->create(['is_highlighted' => true]);
-        $this->get('/')->assertSee('The News Starts')->assertSee('Compare packages')->assertSee('Global Reach')->assertSee('can appear across 200+ leading media outlets');
+        $this->get('/')->assertSee('Your Announcement,')->assertSee('Compare packages')->assertSee('Global Reach')->assertSee('can appear across 200+ leading media outlets');
 
         $this->actingAs($this->admin())->put(route('admin.content.update'), [
             'hero_eyebrow' => 'Press release distribution',

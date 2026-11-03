@@ -77,10 +77,40 @@
             <p id="{{ $prefix }}-message-error" class="field-error" x-show="err('message')" x-text="err('message')" @unless ($errors->has('message')) x-cloak @endunless>{{ $errors->first('message') }}</p>
         </div>
 
-        @if ($turnstileKey)
+        @if (\App\Support\Captcha::driver() === 'image')
+            {{-- Picture captcha: type the characters shown. The image is loaded by script with a fresh URL (pages are cached). --}}
+            <div class="enq-captcha enq-image-captcha md:col-span-2">
+                <input type="hidden" name="captcha_form" value="{{ $prefix }}">
+                <label for="{{ $prefix }}-captcha" class="field-label">Security check</label>
+                <div class="enq-captcha-row">
+                    <img class="enq-captcha-img" data-captcha-src="{{ route('enquiries.captcha', $prefix) }}" width="200" height="64"
+                         alt="Security check: type the characters shown in this image" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+                    <button type="button" class="enq-captcha-reload" data-captcha-reload aria-label="Show a new image">
+                        <x-icon name="refresh" :size="14" :stroke="2.2" /> Reload image
+                    </button>
+                </div>
+                <noscript><img src="{{ route('enquiries.captcha', $prefix) }}" width="200" height="64" alt="Security check image"></noscript>
+                <input id="{{ $prefix }}-captcha" name="captcha" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="20"
+                       placeholder="Type the characters above" required aria-describedby="{{ $prefix }}-captcha-error" {!! $inputAttrs('captcha') !!}>
+                <p id="{{ $prefix }}-captcha-error" class="field-error" x-show="err('captcha')" x-text="err('captcha')" @unless ($errors->has('captcha')) x-cloak @endunless>{{ $errors->first('captcha') }}</p>
+            </div>
+        @elseif (\App\Support\Captcha::driver() === 'recaptcha')
+            {{-- Google reCAPTCHA v2 checkbox, rendered by the script below (one widget per form). --}}
+            <div class="enq-captcha enq-recaptcha md:col-span-2">
+                <div class="g-recaptcha-slot" data-sitekey="{{ config('vmnewswire.recaptcha.site_key') }}"></div>
+                <p class="field-error" x-show="err('g-recaptcha-response')" x-text="err('g-recaptcha-response')" @unless ($errors->has('g-recaptcha-response')) x-cloak @endunless>{{ $errors->first('g-recaptcha-response') }}</p>
+            </div>
+        @elseif ($turnstileKey)
             <div class="md:col-span-2">
                 <div class="cf-turnstile" data-sitekey="{{ $turnstileKey }}"></div>
                 <p class="field-error" x-show="err('cf-turnstile-response')" x-text="err('cf-turnstile-response')" @unless ($errors->has('cf-turnstile-response')) x-cloak @endunless>{{ $errors->first('cf-turnstile-response') }}</p>
+            </div>
+        @elseif (\App\Support\Altcha::enabled())
+            {{-- Self-hosted "I'm not a robot" check (App\Support\Altcha). Starts solving when the visitor focuses the form. --}}
+            <div class="enq-captcha md:col-span-2">
+                <altcha-widget challengeurl="{{ route('enquiries.challenge') }}" name="altcha" auto="onfocus" hidelogo hidefooter
+                               strings='{"label":"I’m not a robot","verified":"Verified — you’re human","verifying":"Checking…","waitAlert":"Checking… please wait.","error":"Check failed. Please try again.","expired":"Check expired. Please tick again."}'></altcha-widget>
+                <p class="field-error" x-show="err('altcha')" x-text="err('altcha')" @unless ($errors->has('altcha')) x-cloak @endunless>{{ $errors->first('altcha') }}</p>
             </div>
         @endif
 
@@ -117,3 +147,108 @@
         </div>
     </div>
 </div>
+
+@once
+    {{-- Pages are served from the page cache, so the CSRF token in the HTML belongs to another session.
+         Fetch a fresh token (GET /enquiries/token, never cached) when the visitor starts on a form, and hold
+         the submit until it has arrived. --}}
+    @if (\App\Support\Captcha::driver() === 'recaptcha')
+        <script>
+            // Render one reCAPTCHA checkbox per enquiry form (the popup and the page form can both be on a page).
+            window.vmnRecaptchaReady = function () {
+                document.querySelectorAll('.g-recaptcha-slot').forEach(function (slot) {
+                    if (slot.dataset.widgetId !== undefined) return;
+                    slot.dataset.widgetId = grecaptcha.render(slot, { sitekey: slot.dataset.sitekey });
+                });
+            };
+        </script>
+        <script src="https://www.google.com/recaptcha/api.js?onload=vmnRecaptchaReady&render=explicit" async defer></script>
+    @elseif (\App\Support\Altcha::enabled())
+        <script type="module" src="https://cdn.jsdelivr.net/npm/altcha@1.5.1/dist/altcha.js" async></script>
+    @endif
+    <script>
+        (function () {
+            var action = @json(route('enquiries.store'));
+            var tokenUrl = @json(route('enquiries.token'));
+            var pending = null;
+            var ready = false;
+
+            function isEnquiryForm(el) { return el && el.tagName === 'FORM' && el.action === action; }
+
+            function refresh() {
+                if (pending) return pending;
+                pending = fetch(tokenUrl, { credentials: 'same-origin', headers: { Accept: 'application/json' }, cache: 'no-store' })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (data) {
+                        if (data && data.token) {
+                            document.querySelectorAll('form').forEach(function (f) {
+                                if (isEnquiryForm(f)) { var i = f.querySelector('input[name="_token"]'); if (i) i.value = data.token; }
+                            });
+                            var meta = document.querySelector('meta[name="csrf-token"]');
+                            if (meta) meta.setAttribute('content', data.token);
+                            ready = true;
+                        } else { pending = null; }
+                    })
+                    .catch(function () { pending = null; });
+                return pending;
+            }
+
+            ['focusin', 'pointerdown'].forEach(function (type) {
+                document.addEventListener(type, function (e) {
+                    var form = e.target && e.target.closest ? e.target.closest('form') : null;
+                    if (isEnquiryForm(form)) refresh();
+                }, true);
+            });
+            window.addEventListener('open-enquiry', refresh);
+
+            // Human check: a solved puzzle can be used once, so start over after the form is reset
+            // ("Send another enquiry") or when the server reports the check as failed or used.
+            // Picture captcha: load a fresh image per form (cache-busting URL), and on "Reload image".
+            function reloadImage(form, clear) {
+                var img = form && form.querySelector('.enq-captcha-img');
+                if (! img) return;
+                img.src = img.dataset.captchaSrc + '?t=' + Date.now() + Math.random().toString(36).slice(2, 7);
+                var input = form.querySelector('input[name="captcha"]');
+                if (clear && input) input.value = '';
+            }
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('form').forEach(function (f) { if (isEnquiryForm(f)) reloadImage(f, false); });
+            });
+            document.addEventListener('click', function (e) {
+                var btn = e.target.closest ? e.target.closest('[data-captcha-reload]') : null;
+                if (! btn) return;
+                e.preventDefault();
+                var form = btn.closest('form');
+                reloadImage(form, true);
+                var input = form && form.querySelector('input[name="captcha"]');
+                if (input) input.focus();
+            });
+
+            function resetCaptcha(form) {
+                reloadImage(form, true);
+                var widget = form && form.querySelector('altcha-widget');
+                if (widget && typeof widget.reset === 'function') widget.reset();
+                var slot = form && form.querySelector('.g-recaptcha-slot');
+                if (slot && slot.dataset.widgetId !== undefined && window.grecaptcha) window.grecaptcha.reset(Number(slot.dataset.widgetId));
+            }
+            document.addEventListener('reset', function (e) { if (isEnquiryForm(e.target)) resetCaptcha(e.target); }, true);
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.enq-captcha .field-error').forEach(function (p) {
+                    new MutationObserver(function () {
+                        if (p.textContent.trim() !== '') resetCaptcha(p.closest('form'));
+                    }).observe(p, { childList: true, characterData: true, subtree: true });
+                });
+            });
+
+            // Runs before the form's own submit handler; waits for the fresh token, then submits again.
+            document.addEventListener('submit', function (e) {
+                var form = e.target;
+                if (! isEnquiryForm(form) || ready || form.dataset.tokenWaited) return;
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                form.dataset.tokenWaited = '1'; // wait at most once, even if the token request fails
+                refresh().then(function () { if (form.requestSubmit) form.requestSubmit(); else form.submit(); });
+            }, true);
+        })();
+    </script>
+@endonce

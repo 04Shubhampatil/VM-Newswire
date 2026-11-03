@@ -51,6 +51,7 @@ Route::delete('/sample-reports/{report}', [SampleReportController::class, 'destr
 Route::get('/enquiries', [EnquiryController::class, 'index'])->name('enquiries.index');
 Route::get('/enquiries/export', [EnquiryController::class, 'export'])->name('enquiries.export');
 Route::get('/enquiries/{enquiry}', [EnquiryController::class, 'show'])->name('enquiries.show');
+Route::post('/enquiries/bulk', [EnquiryController::class, 'bulk'])->name('enquiries.bulk');
 Route::patch('/enquiries/{enquiry}/status', [EnquiryController::class, 'updateStatus'])->name('enquiries.status');
 Route::post('/enquiries/{enquiry}/retry-emails', [EnquiryController::class, 'retryEmails'])->name('enquiries.retry');
 

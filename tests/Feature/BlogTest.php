@@ -52,6 +52,7 @@ class BlogTest extends TestCase
             'body' => "## Lead with the news\n\nThe first line **matters**.\n\n> Keep it short.",
             'meta_title' => 'Custom SEO title',
             'meta_description' => 'Custom SEO description.',
+            'faqs' => [['question' => 'How long should it be?', 'answer' => 'Around 400 words.']],
         ]);
         $related = PressRelease::factory()->create(['title' => 'Related writing tip', 'category' => 'Press Release Writing']);
         PressRelease::factory()->count(5)->create(['category' => 'PR Strategy']);
@@ -74,13 +75,38 @@ class BlogTest extends TestCase
             ->assertSee('More from our blog')
             ->assertSee('Need help distributing your announcement?')
             ->assertSee('Frequently asked questions')
-            ->assertSee('Do I pay online?')
+            ->assertSee('How long should it be?')
+            ->assertSee('Around 400 words.')
+            ->assertDontSee('Do I pay online?')
             ->assertSee('Back to Blogs')
             ->assertSee('"@type":"BlogPosting"', false)
             ->assertSee('id="packages"', false);
 
+        // A post without its own Q&A has no FAQ section at all.
+        $this->get('/blogs/'.$related->slug)->assertOk()->assertDontSee('Frequently asked questions');
+
         $this->get('/blogs/'.$draft->slug)->assertNotFound();
         $this->get('/blogs/does-not-exist')->assertNotFound();
+    }
+
+    public function test_html_bodies_from_the_visual_editor_keep_alignment_and_drop_unsafe_markup(): void
+    {
+        $post = PressRelease::factory()->create([
+            'excerpt' => null,
+            'body' => '<h1>Big</h1><p class="ql-align-justify">Justified <b>text</b> <span style="color:red">here</span>.</p>'
+                .'<p style="text-align: center">Centred</p><script>alert(1)</script><p onclick="x()">Plain <a href="javascript:alert(1)">bad</a> <a href="https://example.com">good</a></p>',
+        ]);
+
+        $this->get('/blogs/'.$post->slug)
+            ->assertOk()
+            ->assertSee('<h2>Big</h2>', false)
+            ->assertSee('<p style="text-align:justify">Justified <strong>text</strong> here.</p>', false)
+            ->assertSee('<p style="text-align:center">Centred</p>', false)
+            ->assertSee('<p>Plain <a>bad</a> <a href="https://example.com" target="_blank" rel="noopener">good</a></p>', false)
+            ->assertDontSee('alert(1)', false)
+            ->assertDontSee('onclick', false);
+
+        $this->assertSame('Big Justified text here. Centred Plain bad good', trim(preg_replace('/\s+/', ' ', $post->teaser)));
     }
 
     public function test_old_newsroom_urls_redirect_to_blogs(): void
@@ -114,6 +140,10 @@ class BlogTest extends TestCase
             'excerpt' => 'Short summary.',
             'body' => 'Full article.',
             'meta_title' => 'CEO appointment',
+            'faqs' => [
+                ['question' => 'When does the CEO start?', 'answer' => 'On the first of next month.'],
+                ['question' => '', 'answer' => 'Blank rows are dropped.'],
+            ],
             'published_at' => now()->subHour()->format('Y-m-d\TH:i'),
             'is_published' => 1,
         ])->assertRedirect(route('admin.blogs.index'))->assertSessionHas('toast');
@@ -121,10 +151,11 @@ class BlogTest extends TestCase
         $post = PressRelease::firstWhere('title', 'Board appoints new CEO');
         $this->assertSame('board-appoints-new-ceo', $post->slug);
         $this->assertSame('CEO appointment', $post->meta_title);
-        $this->get('/blogs/board-appoints-new-ceo')->assertOk();
+        $this->assertCount(1, $post->faqs);
+        $this->get('/blogs/board-appoints-new-ceo')->assertOk()->assertSee('When does the CEO start?')->assertSee('On the first of next month.');
 
         $this->actingAs($admin)->get(route('admin.blogs.index'))->assertOk()->assertSee('Board appoints new CEO');
-        $this->actingAs($admin)->get(route('admin.blogs.edit', $post))->assertOk()->assertSee('SEO title');
+        $this->actingAs($admin)->get(route('admin.blogs.edit', $post))->assertOk()->assertSee('SEO title')->assertSee('FAQ for this post')->assertSee('When does the CEO start?');
 
         $this->actingAs($admin)->put(route('admin.blogs.update', $post), [
             'title' => 'Board appoints new CEO',
@@ -137,6 +168,7 @@ class BlogTest extends TestCase
         $post->refresh();
         $this->assertSame('new-ceo', $post->slug);
         $this->assertFalse($post->is_published);
+        $this->assertNull($post->faqs);
         $this->get('/blogs/new-ceo')->assertNotFound();
 
         $this->actingAs($admin)->delete(route('admin.blogs.destroy', $post))->assertRedirect(route('admin.blogs.index'));

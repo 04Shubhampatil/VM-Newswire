@@ -70,8 +70,8 @@ class BlogController extends Controller
             'related' => $others->take(4),
             'more' => $others->slice(4)->values(),
             'readingMinutes' => $release->reading_minutes,
-            // General FAQs (not tied to a package) shown under every article.
-            'faqs' => Faq::active()->whereNull('package_id')->ordered()->limit(5)->get(),
+            // This post's own Q&A (set in Admin → Blogs); the section is hidden when there are none.
+            'faqs' => $release->faqList(),
         ] + $this->packages());
     }
 

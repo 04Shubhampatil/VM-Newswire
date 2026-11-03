@@ -51,8 +51,9 @@
                         <div><dt class="label-caps">Status</dt><dd class="mt-1 flex items-center gap-2 text-[14px] font-semibold text-heading"><span class="size-1.5 rounded-full bg-success"></span>Active outlet</dd></div>
                     </dl>
                     <div class="flex flex-col gap-3 pt-1 sm:flex-row">
-                        <a href="{{ route('packages.index') }}" class="btn-pill bg-navy-900 text-white hover:bg-brand max-sm:justify-between">
-                            View Packages
+                        {{-- Opens the package that carries this outlet ("Most popular" first); falls back to the comparison page. --}}
+                        <a :href="current.package_url || @js(route('packages.index'))" :title="current.package_name ? 'View ' + current.package_name : 'View all packages'" class="btn-pill bg-navy-900 text-white hover:bg-brand max-sm:justify-between">
+                            <span x-text="current.package_url ? 'View Package' : 'View Packages'">View Package</span>
                             <span class="btn-pill-icon bg-white text-heading"><x-icon name="arrow-right" :size="15" :stroke="2.4" /></span>
                         </a>
                         <a href="{{ route('media-network') }}" class="btn-pill btn-ghost max-sm:justify-between">
